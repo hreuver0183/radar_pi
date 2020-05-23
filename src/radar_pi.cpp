@@ -39,6 +39,7 @@
 #include "SelectDialog.h"
 #include "icons.h"
 #include "navico/NavicoLocate.h"
+#include "raymarine/RaymarineLocate.h"
 #include "nmea0183/nmea0183.h"
 
 PLUGIN_BEGIN_NAMESPACE
@@ -210,7 +211,6 @@ int radar_pi::Init(void) {
   m_notify_control_dialog = false;
 
   m_render_busy = false;
-
   m_bogey_dialog = 0;
   m_alarm_sound_timeout = 0;
   m_guard_bogey_timeout = 0;
@@ -249,6 +249,7 @@ int radar_pi::Init(void) {
   LOG_INFO(wxT(PLUGIN_VERSION_WITH_DATE));
 
   m_locator = 0;
+  m_raymarine_locator = 0;
 
   // Create objects before config, so config can set data in it
   // This does not start any threads or generate any UI.
@@ -300,6 +301,15 @@ int radar_pi::Init(void) {
         wxLogError(wxT("radar_pi: unable to start Navico Radar Locator thread"));
         return 0;
       }
+    }
+    if (m_radar[r]->m_radar_type == RM_E120 && m_raymarine_locator == NULL) {
+      m_raymarine_locator = new RaymarineLocate(this);
+      if (m_raymarine_locator->Run() != wxTHREAD_NO_ERROR) {
+        wxLogError(wxT("radar_pi: unable to start Raymarine Radar Locator thread"));
+        return 0;
+      }
+
+      
     }
   }
   // and get rid of any radars we're not using
@@ -381,6 +391,10 @@ bool radar_pi::DeInit(void) {
     m_locator->Wait();
   }
 
+  if (m_raymarine_locator) {
+    m_raymarine_locator->Shutdown();
+  }
+
   // Stop processing in all radars.
   // This waits for the receive threads to stop and removes the dialog, so that its settings
   // can be saved.
@@ -411,6 +425,11 @@ bool radar_pi::DeInit(void) {
   if (m_locator != NULL) {
     delete m_locator;
     m_locator = 0;
+  }
+
+  if (m_raymarine_locator != NULL) {
+    delete m_raymarine_locator;
+    m_raymarine_locator = 0;
   }
 
   delete m_pMessageBox;

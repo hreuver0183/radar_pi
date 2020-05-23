@@ -236,7 +236,7 @@ bool RadarInfo::Init() {
   ComputeColourMap();
 
   if (!m_control) {
-    m_control = RadarFactory::MakeRadarControl(m_radar_type);
+    m_control = RadarFactory::MakeRadarControl(1);  // $$$ m_radar_type
     // add context menu for control
     wxString t;
     wxMenu dummy_menu;

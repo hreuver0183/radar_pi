@@ -41,6 +41,7 @@
 #include "drawutil.h"
 #include "jsonreader.h"
 #include "navico/NavicoRadarInfo.h"
+#include "raymarine/RaymarineLocate.h"
 #include "nmea0183/nmea0183.h"
 #include "pi_common.h"
 #include "socketutil.h"
@@ -74,7 +75,9 @@ class radar_pi;
 class GuardZoneBogey;
 class RadarArpa;
 class GPSKalmanFilter;
+class RaymarineLocate;
 class NavicoLocate;
+
 
 #define MAX_CHART_CANVAS (2)  // How many canvases OpenCPN supports
 #define RADARS (4)            // Arbitrary limit, anyone running this many is already crazy!
@@ -575,6 +578,7 @@ class radar_pi : public opencpn_plugin_116, public wxEvtHandler {
   RadarInfo *m_radar[RADARS];
   wxString m_perspective[RADARS];  // Temporary storage of window location when plugin is disabled
   NavicoLocate *m_locator;
+  RaymarineLocate *m_raymarine_locator;
 
   MessageBox *m_pMessageBox;
   wxWindow *m_parent_window;

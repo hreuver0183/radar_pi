@@ -52,6 +52,10 @@
 #include "emulator/EmulatorControlsDialog.h"
 #include "emulator/EmulatorReceive.h"
 
+#include "raymarine/RME120Control.h"
+#include "raymarine/RME120ControlsDialog.h"
+#include "raymarine/RME120Receive.h"
+
 #endif /* _RADARTYPE_H_ */
 
 #define DEFINE_RADAR(t, x, s, l, a, b, c, d)
@@ -96,6 +100,8 @@
 #include "navico/halobtype.h"
 
 // TODO: Add Garmin etc.
+
+#include "raymarine/RME120type.h"
 
 #include "emulator/emulatortype.h"
 

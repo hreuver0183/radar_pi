@@ -80,6 +80,20 @@ SET(SRC_NAVICO
             src/navico/NavicoRadarInfo.h
 )
 
+SET(SRC_RAYMARINE
+            src/raymarine/RME120type.h
+            src/raymarine/RME120Receive.cpp
+            src/raymarine/RME120Receive.h
+            src/raymarine/RME120Control.cpp
+            src/raymarine/RME120Control.h
+            src/raymarine/RME120ControlSet.h
+            src/raymarine/RME120ControlsDialog.cpp
+            src/raymarine/RME120ControlsDialog.h            
+            src/raymarine/RME120RadarInfo.h
+			src/raymarine/RaymarineLocate.h
+			src/raymarine/RaymarineLocate.cpp
+)
+
 SET(SRC_RADAR
             src/ControlsDialog.cpp
             src/ControlsDialog.h
@@ -163,7 +177,7 @@ INCLUDE_DIRECTORIES(src/nmea0183)
 INCLUDE_DIRECTORIES(src/wxJSON)
 INCLUDE_DIRECTORIES(src)
 
-ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_RADAR} ${SRC_NMEA0183} ${SRC_JSON} ${SRC_EMULATOR} ${SRC_GARMIN_HD} ${SRC_GARMIN_XHD} ${SRC_NAVICO})
+ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_RADAR} ${SRC_NMEA0183} ${SRC_JSON} ${SRC_EMULATOR} ${SRC_GARMIN_HD} ${SRC_GARMIN_XHD} ${SRC_NAVICO} ${SRC_RAYMARINE})
 
 
 INCLUDE("cmake/PluginInstall.cmake")

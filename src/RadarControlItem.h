@@ -69,6 +69,8 @@ class RadarControlItem {
     m_button_v = VALUE_NOT_SET;  // Unlikely value so that first actual set sets proper value + mod
     m_button_s = RCS_OFF;
     m_mod = true;
+    m_min = -VALUE_NOT_SET;
+    m_max = VALUE_NOT_SET;
   }
 
   // The copy constructor
@@ -96,7 +98,16 @@ class RadarControlItem {
       m_button_v = v;
       m_button_s = s;
     }
-    m_value = v;
+    if (v <= m_max && v >= m_min) {
+      m_value = v;
+      m_button_s = s;
+    } else if (v >= m_max){
+      m_value = m_max;
+      m_button_s = s;
+    } else if (v < m_min){
+      m_value = m_min;
+      m_button_s = s;
+    }
     m_state = s;
   };
 
@@ -162,6 +173,10 @@ class RadarControlItem {
     return m_mod;
   }
 
+  void SetMax(int max) { m_max = max;}
+
+  void SetMin(int min) { m_max = min; }
+
  protected:
   wxCriticalSection m_exclusive;
   int m_value;
@@ -169,6 +184,8 @@ class RadarControlItem {
   RadarControlState m_state;
   RadarControlState m_button_s;
   bool m_mod;
+  int m_max;   // added for Raymarine
+  int m_min;
 };
 
 /*
