@@ -69,6 +69,7 @@ class RadarInfo {
   RadarType m_radar_type;  // Which radar type
   size_t m_spokes;         // # of spokes per rotation
   size_t m_spoke_len_max;  // Max # of bytes per spoke
+  NetworkAddress m_radar_address; // current network address of the radar. Only when radar has been seen. Only used for Raymarine
 
   // Digital radars cannot produce just any range. When asked for a particular value
   // they produce a slightly larger range.
@@ -266,6 +267,7 @@ class RadarInfo {
   GeoPosition m_mouse_pos;
   double m_mouse_ebl[ORIENTATION_NUMBER];
   double m_mouse_vrm;
+
 
   // Speedup lookup tables of color to r,g,b, set dependent on m_settings.display_option.
   PixelColour m_colour_map_rgb[BLOB_COLOURS];

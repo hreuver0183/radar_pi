@@ -47,6 +47,7 @@ class RadarReceive : public wxThread {
     Create(1024 * 1024);  // Stack size, be liberal
     m_pi = pi;            // This allows you to access the main plugin stuff
     m_ri = ri;            // and this the per-radar stuff
+    m_is_shutdown = false;
   }
 
   virtual ~RadarReceive() {}
@@ -64,6 +65,7 @@ class RadarReceive : public wxThread {
    */
   virtual wxString GetInfoStatus() = 0;
   virtual void SetInfoStatus(wxString s) {};
+  bool m_is_shutdown;
 
   /*
    * Shutdown

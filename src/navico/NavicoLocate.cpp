@@ -286,7 +286,7 @@ bool NavicoLocate::ProcessReport(const NetworkAddress &radar_address, const Netw
     RadarReport_01B2 *data = (RadarReport_01B2 *)report;
     wxCriticalSectionLocker lock(m_exclusive);
 
-    NavicoRadarInfo infoA;
+    RadarLocationInfo infoA;
     infoA.serialNr = wxString::FromAscii(data->serialno);
     infoA.spoke_data_addr = NetworkAddress(data->addrDataA);
     infoA.report_addr = NetworkAddress(data->addrReportA);
@@ -303,7 +303,7 @@ bool NavicoLocate::ProcessReport(const NetworkAddress &radar_address, const Netw
     m_pi->FoundNavicoRadarInfo(radar_ipA, interface_address, infoA);
 
     if (len > 150) {  // for 3G radar len == 150, no B available
-      NavicoRadarInfo infoB;
+      RadarLocationInfo infoB;
       infoB.serialNr = wxString::FromAscii(data->serialno);
       infoB.spoke_data_addr = NetworkAddress(data->addrDataB);
       infoB.report_addr = NetworkAddress(data->addrReportB);

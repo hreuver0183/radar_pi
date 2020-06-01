@@ -402,7 +402,7 @@ struct PersistentSettings {
   wxString alert_audio_file;                       // Filepath of alarm audio file. Must be WAV.
   NetworkAddress radar_interface_address[RADARS];  // Saved address of interface used to see radar. Used to speed up next boot.
   NetworkAddress radar_address[RADARS];            // Saved address of IP address of radar.
-  NavicoRadarInfo navico_radar_info[RADARS];       // Navico specific stuff (multicast addresses + serial nr)
+  RadarLocationInfo navico_radar_info[RADARS];       // Navico specific stuff (multicast addresses + serial nr)
   wxColour trail_start_colour;                     // Starting colour of a trail
   wxColour trail_end_colour;                       // Ending colour of a trail
   wxColour doppler_approaching_colour;             // Colour for Doppler Approaching returns
@@ -517,10 +517,11 @@ class radar_pi : public opencpn_plugin_116, public wxEvtHandler {
     return m_settings.radar_address[r];
   }
 
-  void SetNavicoRadarInfo(size_t r, const NavicoRadarInfo &info);
-  void FoundNavicoRadarInfo(const NetworkAddress &radar_addr, const NetworkAddress &interface_addr, const NavicoRadarInfo &info);
+  void SetNavicoRadarInfo(size_t r, const RadarLocationInfo &info);
+  void FoundNavicoRadarInfo(const NetworkAddress &radar_addr, const NetworkAddress &interface_addr, const RadarLocationInfo &info);
+  void FoundRaymarineRadarInfo(const NetworkAddress &radar_addr, const NetworkAddress &interface_addr, const RadarLocationInfo &info);
   bool HaveRadarSerialNo(size_t r);
-  NavicoRadarInfo &GetNavicoRadarInfo(size_t r);
+  RadarLocationInfo &GetNavicoRadarInfo(size_t r);
 
   void SetRadarHeading(double heading = nan(""), bool isTrue = false);
   double GetHeadingTrue() {

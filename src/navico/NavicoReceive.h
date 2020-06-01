@@ -65,11 +65,11 @@ class NavicoReceive : public RadarReceive {
     LOG_INFO(wxT("radar_pi: %s receive thread created, prio= %i"), m_ri->m_name.c_str(), GetPriority());
     InitializeLookupData();
 
-    NavicoRadarInfo info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
+    RadarLocationInfo info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
     if (info.report_addr.IsNull() && !m_info.report_addr.IsNull()) {
       // BR24, 3G, 4G initial setup, when ini file doesn't contain multicast addresses yet
       // In this case m_info.spoke_data_addr etc. are correct, these don't really change in the wild according to our data,
-      // so write them into the NavicoRadarInfo object.
+      // so write them into the RadarLocationInfo object.
       m_pi->SetNavicoRadarInfo(m_ri->m_radar, m_info);
     } else if (!info.report_addr.IsNull() && ri->m_radar_type != RT_BR24) {
       // Restart, when ini file contains multicast addresses, that are hopefully still correct.
@@ -88,7 +88,7 @@ class NavicoReceive : public RadarReceive {
   wxString GetInfoStatus();
 
   NetworkAddress m_interface_addr;
-  NavicoRadarInfo m_info;
+  RadarLocationInfo m_info;
 
   wxLongLong m_shutdown_time_requested;  // Main thread asks this thread to stop
   volatile bool m_is_shutdown;

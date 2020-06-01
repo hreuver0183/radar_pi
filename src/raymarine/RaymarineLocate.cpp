@@ -35,7 +35,7 @@
 PLUGIN_BEGIN_NAMESPACE
 
 //
-// Raymarine E120 radars and compatible report their addresses here, including the version #.
+// Raymarine E120 radars and compatible report their addresses here, (including the version?) #.
 //
 static const NetworkAddress reportRaymarineCommon(224, 0, 0, 1, 5800);
 
@@ -61,7 +61,6 @@ void RaymarineLocate::CleanupCards() {
 }
 
 void RaymarineLocate::UpdateEthernetCards() {
-  LOG_INFO(wxT("$$$ AAAA2"));
   struct ifaddrs *addr_list;
   struct ifaddrs *addr;
   size_t i = 0;
@@ -109,6 +108,7 @@ void RaymarineLocate::UpdateEthernetCards() {
 void *RaymarineLocate::Entry(void) {
   int r = 0;
   int rescan_network_cards = 0;
+  bool success = false;
 
   union {
     sockaddr_storage addr;
@@ -118,7 +118,7 @@ void *RaymarineLocate::Entry(void) {
 
   uint8_t data[1500];
 
-  LOG_VERBOSE(wxT("radar_pi: RaymarineLocate thread starting"));
+  LOG_INFO(wxT("radar_pi: $$$RaymarineLocate thread starting"));
 
   m_is_shutdown = false;
 
@@ -148,17 +148,16 @@ void *RaymarineLocate::Entry(void) {
         if (m_socket[i] != INVALID_SOCKET && FD_ISSET(m_socket[i], &fdin)) {
           rx_len = sizeof(rx_addr);
           r = recvfrom(m_socket[i], (char *)data, sizeof(data), 0, (struct sockaddr *)&rx_addr, &rx_len);
-          LOG_INFO(wxT("$$$ AAAA"));
           if (r > 2) {   // we are not interested in 2 byte messages
-            LOG_INFO(wxT("$$$ AAAA1 %i"),r);
             NetworkAddress radar_address;
             radar_address.addr = rx_addr.ipv4.sin_addr;
             radar_address.port = rx_addr.ipv4.sin_port;
 
             if (ProcessReport(radar_address, m_interface_addr[i], data, (size_t)r)) {
               rescan_network_cards = -PERIOD_UNTIL_CARD_REFRESH;  // Give double time until we rescan
-              //wake_timeout = -PERIOD_UNTIL_WAKE_RADAR;
             }
+            success = true;
+            LOG_INFO(wxT("$$$a locate success"));
           }
         }
       }
@@ -172,105 +171,15 @@ void *RaymarineLocate::Entry(void) {
 
   }  // endless loop until thread destroy
 
+  LOG_INFO(wxT("radar_pi: $$$RaymarineLocate thread stopping"));
+
   CleanupCards();
 
-  LOG_VERBOSE(wxT("radar_pi: RaymarineLocate thread stopping"));
+  LOG_VERBOSE(wxT("radar_pi: $$$RaymarineLocate thread stopping"));
   m_is_shutdown = true;
   return 0;
 }
 
-/*
- RADAR REPORTS
-
- The radars send various reports. The first 2 bytes indicate what the report type is.
- The types seen on a BR24 are:
-
- 2nd byte C4:   01 02 03 04 05 07 08
- 2nd byte F5:   08 0C 0D 0F 10 11 12 13 14
-
- Not definitive list for
- 4G radars only send the C4 data.
-
- */
-
- //
- // The following is the received radar state. It sends this regularly
- // but especially after something sends it a state change.
- //
-#pragma pack(push, 1)
-
-/*
-
- BR24:   N/A
- 3G:     N/A
-             Serial______________            Addr____Port                        Addr____Port        Addr____Port Addr____Port
-Addr____Port                    Addr____Port        Addr____Port        Addr____Port                    Addr____Port Addr____Port
-Addr____Port                    Addr____Port        Addr____Port        Addr____Port                    Addr____Port Addr____Port
-Addr____Port 4G:
-01B2313430333330323030300000000000000A0043D901010600FDFF20010200100000000A0043D9176011000000EC0607161A261F002001020010000000EC0607171A1C11000000EC0607181A1D10002001030010000000EC0607081A1611000000EC06070A1A1812000000EC0607091A1710002002030010000000EC06070D1A0111000000EC06070E1A0212000000EC06070F1A0312002001030010000000EC0607121A2011000000EC0607141A2212000000EC0607131A2112002002030010000000EC06070C1A0411000000EC06070D1A0512000000EC06070E1A06
- HALO:
-01B231353039303332303030000000000000C0A800F014300600FDFF2001020010000000EC06076117F111000000EC0607161A261F002001020010000000EC06076217F211000000EC06076317F310002001030010000000EC06076417F411000000EC06076517F512000000EC06076617F610002002030010000000EC06076717F711000000EC06076817F812000000EC06076917F912002001030010000000EC06076A17FA11000000EC06076B17FB12000000EC06076C17FC12002002030010000000EC06076D17FD11000000EC06076E17FE12000000EC06076F17FF
- HALO24:
-01B2313930323530313030300000000000000A0043C620310600FDFF2001020010000000EC060820197011000000EC0607161A261F002001020010000000EC060821197111000000EC060822197210002001030010000000EC060823197311000000EC060824197412000000EC060823197510002002030010000000EC060825197611000000EC060826197712000000EC060825197812002001030010000000EC060823197911000000EC060827197A12000000EC060823197B12002002030010000000EC060825197C11000000EC060828197D12000000EC060825197E
-
-0A 00 43 D9 01 01 06 00 FD FF 20 01 02 00 10 00 00 00
-0A 00 43 D9 17 60 11 00 00 00
-EC 06 07 16 1A 26 1F 00 20 01 02 00 10 00 00 00
-EC 06 07 17 1A 1C 11 00 00 00
-EC 06 07 18 1A 1D 10 00 20 01 03 00 10 00 00 00
-EC 06 07 08 1A 16 11 00 00 00
-EC 06 07 0A 1A 18 12 00 00 00
-EC 06 07 09 1A 17 10 00 20 02 03 00 10 00 00 00
-EC 06 07 0D 1A 01 11 00 00 00
-EC 06 07 0E 1A 02 12 00 00 00
-EC 06 07 0F 1A 03 12 00 20 01 03 00 10 00 00 00
-EC 06 07 12 1A 20 11 00 00 00
-EC 06 07 14 1A 22 12 00 00 00
-EC 06 07 13 1A 21 12 00 20 02 03 00 10 00 00 00
-EC 06 07 0C 1A 04 11 00 00 00
-EC 06 07 0D 1A 05 12 00 00 00
-EC 06 07 0E 1A 06
-*/
-
-
-
-//struct RadarReport_01B2 {
-//  uint16_t id;
-//  char serialno[16];          // ASCII serial number, zero terminated
-//  PackedAddress addr0;        // 0A 00 43 D9 01 01
-//  uint8_t u1[12];             // 11000000
-//  PackedAddress addr1;        // EC0608201970
-//  uint8_t u2[4];              // 11000000
-//  PackedAddress addr2;        // EC0607161A26
-//  uint8_t u3[10];             // 1F002001020010000000
-//  PackedAddress addr3;        // EC0608211971
-//  uint8_t u4[4];              // 11000000
-//  PackedAddress addr4;        // EC0608221972
-//  uint8_t u5[10];             // 10002001030010000000
-//  PackedAddress addrDataA;    // EC0608231973
-//  uint8_t u6[4];              // 11000000
-//  PackedAddress addrSendA;    // EC0608241974
-//  uint8_t u7[4];              // 12000000
-//  PackedAddress addrReportA;  // EC0608231975
-//  uint8_t u8[10];             // 10002002030010000000
-//  PackedAddress addrDataB;    // EC0608251976
-//  uint8_t u9[4];              // 11000000
-//  PackedAddress addrSendB;    // EC0608261977
-//  uint8_t u10[4];             // 12000000
-//  PackedAddress addrReportB;  // EC0608251978
-//  uint8_t u11[10];            // 12002001030010000000
-//  PackedAddress addr11;       // EC0608231979
-//  uint8_t u12[4];             // 11000000
-//  PackedAddress addr12;       // EC060827197A
-//  uint8_t u13[4];             // 12000000
-//  PackedAddress addr13;       // EC060823197B
-//  uint8_t u14[10];            // 12002002030010000000
-//  PackedAddress addr14;       // EC060825197C
-//  uint8_t u15[4];             // 11000000
-//  PackedAddress addr15;       // EC060828197D
-//  uint8_t u16[4];             // 12000000
-//  PackedAddress addr16;       // EC060825197E
-//};
 
 #pragma pack(pop)
 
@@ -289,83 +198,47 @@ struct SRMRadarFunc {
 
 bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const NetworkAddress &interface_address,
                                     const uint8_t *report, size_t len) {
-  if (report[0] == 01 && report[1] == 0xB1) {  // Wake radar
-    LOG_VERBOSE(wxT("radar_pi: Wake radar request from %s"), radar_address.FormatNetworkAddress());
-  }
-  if (report[0] == 01 && report[1] == 0xB2) {  // Common Raymarine message from 4G++
+  
+   // LOG_INFO(wxT("radar_pi: $$$Wake radar request from %s"), radar_address.FormatNetworkAddress());
+
+  SRMRadarFunc *rRec = (SRMRadarFunc *)report;
+   wxCriticalSectionLocker lock(m_exclusive);
+  
+  if (len == sizeof(SRMRadarFunc) && rRec->func_id == 1) {  // only length 36 is processed with id==1, others (28, 37, 40, 56) to be investigated
     if (m_pi->m_settings.verbose >= 0 /* was 2*/) {
       LOG_BINARY_RECEIVE(wxT("radar_pi: $$$ RaymarineLocate received RadarReport"), report, len);
     }
     
-    SRMRadarFunc *rRec = (SRMRadarFunc *)report;
-    wxCriticalSectionLocker lock(m_exclusive);
-
     // radar_address.addr.s_addr = ntohl(rRec->radar_ip);
     // radar_address.port = ntohs(rRec->radar_port);
 
-
-    NavicoRadarInfo infoA;
+    RadarLocationInfo infoA;
     wxString sernr = wxT(" ");
     infoA.serialNr = sernr;  // empty
    // infoA.spoke_data_addr = NetworkAddress(rRec->radar_ip);
-    infoA.spoke_data_addr.addr.s_addr = ntohl(rRec->radar_ip);
-    infoA.spoke_data_addr.port = ntohs(rRec->radar_port);
+    infoA.spoke_data_addr.addr.s_addr = ntohl(rRec->mcast_ip);
+    infoA.spoke_data_addr.port = ntohs(rRec->mcast_port);
+    infoA.report_addr.addr.s_addr = ntohl(rRec->mcast_ip);
+    infoA.report_addr.port = ntohs(rRec->mcast_port);
+    infoA.send_command_addr.addr.s_addr = ntohl(rRec->mcast_ip);
+    infoA.send_command_addr.port = ntohs(rRec->mcast_port);
    /* infoA.report_addr = NetworkAddress(rRec->radar_ip);
     infoA.send_command_addr = NetworkAddress(data->addrSendA);*/
     NetworkAddress radar_ipA = radar_address;
     radar_ipA.port = htons(RO_PRIMARY);
-   /* if (m_report_count < MAX_REPORT) {
-      LOG_INFO(wxT("radar_pi: Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
+    if (m_report_count < MAX_REPORT) {
+      LOG_INFO(wxT("radar_pi: $$$Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
       m_report_count++;
     }
     else {
-      LOG_RECEIVE(wxT("radar_pi: Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
-    }*/
-   // m_pi->FoundRaymarineRadarInfo(radar_ipA, interface_address, infoA);
-
-    //if (len > 150) {  // for 3G radar len == 150, no B available
-    //  RaymarineRadarInfo infoB;
-    //  infoB.serialNr = wxString::FromAscii(data->serialno);
-    //  infoB.spoke_data_addr = NetworkAddress(data->addrDataB);
-    //  infoB.report_addr = NetworkAddress(data->addrReportB);
-    //  infoB.send_command_addr = NetworkAddress(data->addrSendB);
-    //  NetworkAddress radar_ipB = radar_address;
-    //  radar_ipB.port = htons(RO_SECONDARY);
-    //  if (m_report_count < MAX_REPORT) {
-    //    LOG_INFO(wxT("radar_pi: Located radar IP %s, interface %s [%s]"), radar_ipB.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoB.to_string());
-    //  } else {
-    //    LOG_RECEIVE(wxT("radar_pi: Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
-    //    m_report_count++;
-    //  }
-    //  m_pi->FoundRaymarineRadarInfo(radar_ipB, interface_address, infoB);
-    //}
-#define LOG_ADDR_N(n)                                                                                  \
-  LOG_INFO(wxT("radar_pi: RaymarineLocate %s addr %s = %s"), radar_address.FormatNetworkAddress(), #n, \
-              FormatPackedAddress(data->addr##n));
-
-    /*IF_LOG_AT_LEVEL(LOGLEVEL_RECEIVE) {*/
-     /* LOG_ADDR_N(0);
-      LOG_ADDR_N(1);
-      LOG_ADDR_N(2);
-      LOG_ADDR_N(3);
-      LOG_ADDR_N(4);
-      LOG_ADDR_N(DataA);
-      LOG_ADDR_N(SendA);
-      LOG_ADDR_N(ReportA);
-      LOG_ADDR_N(DataB);
-      LOG_ADDR_N(SendB);
-      LOG_ADDR_N(ReportB);
-      LOG_ADDR_N(11);
-      LOG_ADDR_N(12);
-      LOG_ADDR_N(13);
-      LOG_ADDR_N(14);
-      LOG_ADDR_N(15);
-      LOG_ADDR_N(16);*/
-    /*}*/
+      LOG_RECEIVE(wxT("radar_pi: $$$Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
+    }
+    LOG_INFO(wxT("radar_pi: $$$ radar_ipA"));
+    m_pi->FoundRaymarineRadarInfo(radar_ipA, interface_address, infoA);
     return true;
   }
 
-  LOG_BINARY_RECEIVE(wxT("radar_pi: RaymarineLocate received unknown message"), report, len);
+  //LOG_BINARY_RECEIVE(wxT("radar_pi: RaymarineLocate received unknown message"), report, len);
   return false;
 }
 

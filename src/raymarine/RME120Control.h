@@ -52,8 +52,19 @@ class RME120Control: public RadarControl {
   void RadarTxOn();
   bool RadarStayAlive();
   bool SetRange(int meters);
+  void SetMultiCastAddress(NetworkAddress sendMultiCastAddress);
 
   bool SetControlValue(ControlType controlType, RadarControlItem &item, RadarControlButton *button);
+
+   private:
+  radar_pi *m_pi;
+  RadarInfo *m_ri;
+  struct sockaddr_in m_addr;
+  SOCKET m_radar_socket;
+  wxString m_name;
+
+ // bool TransmitCmd(const uint8_t *msg, int size);
+//  void logBinaryData(const wxString &what, const uint8_t *data, int size);
 };
 
 

@@ -121,6 +121,13 @@ void RadarInfo::Shutdown() {
     wxLongLong threadStartWait = wxGetUTCTimeMillis();
     m_receive->Shutdown();
     m_receive->Wait();
+    //while (!m_receive->m_is_shutdown) {   // $$$
+    //  wxYield();
+    //  wxMilliSleep(10);
+    //  LOG_INFO(wxT("$$$24 shutdown radar i"));
+    // /* threadExtraWait = wxGetUTCTimeMillis();*/
+    //}
+    LOG_INFO(wxT("$$$23 shutdown radar i"));
     wxLongLong threadEndWait = wxGetUTCTimeMillis();
 
 #ifdef NEVER
@@ -226,6 +233,7 @@ bool RadarInfo::Init() {
   m_name = RadarTypeName[m_radar_type];
   m_spokes = RadarSpokes[m_radar_type];
   m_spoke_len_max = RadarSpokeLenMax[m_radar_type];
+  m_radar_address = NetworkAddress(0, 0, 0, 0, 0);
 
   m_history = (line_history *)calloc(sizeof(line_history), m_spokes);
   for (size_t i = 0; i < m_spokes; i++) {
@@ -252,6 +260,7 @@ bool RadarInfo::Init() {
     m_pi->m_context_menu_control_id[m_radar] = AddCanvasContextMenuItem(m_pi->m_mi3[m_radar], m_pi);
   }
   if (!m_radar_panel) {
+    LOG_INFO(wxT("$$$x creating radarpanel for radar %s"), m_name.c_str());
     m_radar_panel = new RadarPanel(m_pi, this, m_pi->m_parent_window);
     if (!m_radar_panel || !m_radar_panel->Create()) {
       wxLogError(wxT("radar_pi %s: Unable to create RadarPanel"), m_name.c_str());

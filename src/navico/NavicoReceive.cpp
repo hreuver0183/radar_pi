@@ -867,7 +867,7 @@ bool NavicoReceive::ProcessReport(const uint8_t *report, size_t len) {
           wxString s =
               wxString::Format(wxT("IP %s %s"), m_pi->m_settings.radar_address[m_ri->m_radar].FormatNetworkAddress(), stat.c_str());
           if (RadarOrder[m_ri->m_radar_type] >= RO_PRIMARY) {
-            NavicoRadarInfo info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
+            RadarLocationInfo info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
             s << wxT("\n") << _("Serial #") << info.serialNr;
           }
           SetInfoStatus(s);

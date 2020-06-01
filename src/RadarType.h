@@ -48,13 +48,13 @@
 #include "navico/NavicoControlsDialog.h"
 #include "navico/NavicoReceive.h"
 
-#include "emulator/EmulatorControl.h"
-#include "emulator/EmulatorControlsDialog.h"
-#include "emulator/EmulatorReceive.h"
-
 #include "raymarine/RME120Control.h"
 #include "raymarine/RME120ControlsDialog.h"
 #include "raymarine/RME120Receive.h"
+
+#include "emulator/EmulatorControl.h"
+#include "emulator/EmulatorControlsDialog.h"
+#include "emulator/EmulatorReceive.h"
 
 #endif /* _RADARTYPE_H_ */
 

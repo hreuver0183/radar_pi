@@ -37,7 +37,7 @@
 
 PLUGIN_BEGIN_NAMESPACE
 
-class NavicoRadarInfo {
+class RadarLocationInfo {
  public:
   wxString serialNr;                 // Serial # for this radar
   NetworkAddress spoke_data_addr;    // Where the radar will send data spokes
@@ -52,9 +52,9 @@ class NavicoRadarInfo {
                             send_command_addr.to_string());
   }
 
-  NavicoRadarInfo() {}
+  RadarLocationInfo() {}
 
-  NavicoRadarInfo(wxString &str) {
+  RadarLocationInfo(wxString &str) {
     wxStringTokenizer tokenizer(str, "/");
 
     if (tokenizer.HasMoreTokens()) {
@@ -70,7 +70,7 @@ class NavicoRadarInfo {
       send_command_addr = NetworkAddress(tokenizer.GetNextToken());
     }
   }
-  bool operator == (NavicoRadarInfo inf) {
+  bool operator == (RadarLocationInfo inf) {
     if (serialNr == inf.serialNr && report_addr == inf.report_addr && spoke_data_addr == inf.spoke_data_addr
       && send_command_addr == inf.send_command_addr) {
       return true;
