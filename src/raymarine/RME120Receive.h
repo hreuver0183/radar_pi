@@ -58,8 +58,6 @@ class RME120Receive : public RadarReceive {
     m_first_receive = true;
     m_interface_addr = m_pi->GetRadarInterfaceAddress(ri->m_radar);
     wxString addr1 = m_interface_addr.FormatNetworkAddress();
-    LOG_INFO(wxT("$$$q RadarReceive m_interface_addr=%s "), addr1);
-
     m_receive_socket = GetLocalhostServerTCPSocket();
     m_send_socket = GetLocalhostSendTCPSocket(m_receive_socket);
     SetInfoStatus(wxString::Format(wxT("%s: %s"), m_ri->m_name.c_str(), _("Initializing")));
@@ -67,13 +65,8 @@ class RME120Receive : public RadarReceive {
     LOG_INFO(wxT("radar_pi: %s receive thread created, prio= %i"), m_ri->m_name.c_str(), GetPriority());
 
     // InitializeLookupData();
-    LOG_INFO(wxT(" $$$q write navico info %s"), m_pi->m_settings.navico_radar_info[m_ri->m_radar].to_string());
-   
 
     RadarLocationInfo info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
-    LOG_INFO(wxT(" $$$q2 write navico info %s"), m_pi->m_settings.navico_radar_info[m_ri->m_radar].to_string());
-    
-
     if (info.report_addr.IsNull() && !m_info.report_addr.IsNull()) {
       // BR24, 3G, 4G initial setup, when ini file doesn't contain multicast addresses yet
       // In this case m_info.spoke_data_addr etc. are correct, these don't really change in the wild according to our data,
@@ -85,8 +78,7 @@ class RME120Receive : public RadarReceive {
       // This will also overwrite the initial addresses for 3G and 4G with those from the ini file
       // If not we will time-out and then NavicoLocate will find the radar.
       m_info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
-      LOG_INFO(wxT("radar_pi: %s $$$2RadarReceive GetNavicoRadarInfo m_info= %s radar= %i"), m_ri->m_name, m_info.to_string(),
-               m_ri->m_radar);
+      
       LOG_INFO(wxT(" $$$q write navico info %s"), m_pi->m_settings.navico_radar_info[m_ri->m_radar].to_string());
     }
   };

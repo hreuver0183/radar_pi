@@ -653,7 +653,6 @@ struct CRMScanData {
 
 
 void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
-  LOG_INFO(wxT("$$$ ProcessScanData1"));
   if (len > sizeof(CRMPacketHeader) + sizeof(CRMScanHeader)) {
     CRMPacketHeader *pHeader = (CRMPacketHeader *)data;
     RadarType strange_radar_type = RM_E120;
@@ -662,7 +661,6 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
               pHeader->nspokes, pHeader->something_3);
       return;
     }
-    LOG_INFO(wxT("$$$ ProcessScanData2"));
     m_ri->m_state.Update(RADAR_TRANSMIT);
 
     if (pHeader->something_4 == 0x400) {
@@ -710,7 +708,6 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
         LOG_INFO(wxT("$$$ProcessScanData::Scan header #%d regular second header with HD first.\n"), headerIdx);
       }
 
-      LOG_INFO(wxT("$$$ ProcessScanData10"));
       nextOffset += sizeof(CRMScanHeader);
 
       CRMRecordHeader *nHeader = (CRMRecordHeader *)(data + nextOffset);
@@ -728,7 +725,6 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
                 pSData->data_len);
         break;
       }
-      LOG_INFO(wxT("$$$ ProcessScanData16"));
       UINT8 unpacked_data[1024], *dataPtr = 0;
       if (strange_radar_type == RM_E120) {
         uint8_t *dData = (uint8_t *)unpacked_data;
@@ -765,9 +761,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
             iD += 2;
           }
         }
-        LOG_INFO(wxT("$$$ ProcessScanData17"));
         if (iD != 512) {
-          LOG_INFO(wxT("$$$ ProcessScanData21"));
          /* LOG_INFO(wxT("ProcessScanData::Packet %d line %d (%d/%x) not complete %d.\n"), packetIdx, headerIdx,
            	scan_idx, scan_idx, iD);*/
         }
@@ -776,17 +770,15 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
         LOG_INFO(wxT("$$$ radartype8"));
         if (pSData->data_len != RETURNS_PER_LINE * 2) {
           m_ri->m_statistics.broken_spokes++;
-          fprintf(stderr, "ProcessScanData data len %d should be %d.\n", pSData->data_len, RETURNS_PER_LINE);
-          LOG_INFO(wxT("$$$ ProcessScanData11"));
+          LOG_INFO(wxT("ProcessScanData data len %d should be %d.\n"), pSData->data_len, RETURNS_PER_LINE);
           break;
         }
         if (m_range_meters == 0) m_range_meters = 1852 / 4;  // !!!TEMP delete!!!
         dataPtr = (UINT8 *)data + nextOffset + sizeof(CRMScanData);
       } else {
-        fprintf(stderr, "ProcessScanData::Packet radar type is not set somehow.\n");
+        LOG_INFO(wxT("ProcessScanData::Packet radar type is not set somehow.\n"));
         break;
       }
-      LOG_INFO(wxT("$$$ ProcessScanData12"));
       nextOffset += pSData->length;
       m_ri->m_statistics.spokes++;
       unsigned int spoke = sHeader->azimuth;
@@ -798,13 +790,11 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
         }
       }
       m_next_spoke = (spoke + 1) % 2048;
-      LOG_INFO(wxT("$$$ ProcessScanData13"));
 
       if ((pSData->type & 0x80000000) != 0 && nextOffset < len) {
         // fprintf(stderr, "ProcessScanData::Last record %d (%d) in packet %d but still data to go %d:%d.\n",
         // 	headerIdx, scan_idx, packetIdx, nextOffset, len);
       }
-      LOG_INFO(wxT("$$$ ProcessScanData14"));
       headerIdx++;
 
       m_pi->SetRadarHeading();
@@ -816,7 +806,6 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
 
       SpokeBearing a = MOD_ROTATION2048(angle_raw / 2);    // divide by 2 to map on 2048 scanlines
       SpokeBearing b = MOD_ROTATION2048(bearing_raw / 2);  // divide by 2 to map on 2048 scanlines
-      LOG_INFO(wxT("$$$ ProcessScanData15"));
       m_ri->ProcessRadarSpoke(a, b, dataPtr, RETURNS_PER_LINE, m_range_meters, nowMillis);
     }
   }

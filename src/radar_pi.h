@@ -490,6 +490,7 @@ class radar_pi : public opencpn_plugin_116, public wxEvtHandler {
   void ConfirmGuardZoneBogeys();
   void ResetOpenGLContext();
   void logBinaryData(const wxString &what, const uint8_t *data, int size);
+  void StartRadarLocators(size_t r);
 
   void UpdateAllControlStates(bool all);
 

@@ -295,24 +295,7 @@ int radar_pi::Init(void) {
   // Now that the settings are made we can initialize the RadarInfos
   for (size_t r = 0; r < M_SETTINGS.radar_count; r++) {
     m_radar[r]->Init();
-    if ((m_radar[r]->m_radar_type == RT_3G || m_radar[r]->m_radar_type == RT_4GA || m_radar[r]->m_radar_type == RT_HaloA) &&
-        m_locator == NULL) {
-      m_locator = new NavicoLocate(this);
-      if (m_locator->Run() != wxTHREAD_NO_ERROR) {
-        wxLogError(wxT("radar_pi: unable to start Navico Radar Locator thread"));
-        return 0;
-      }
-    }
-    LOG_INFO(wxT("$$$ type = %i"), m_radar[r]->m_radar_type);
-    if (m_radar[r]->m_radar_type == RM_E120 && m_raymarine_locator == NULL) {
-      m_raymarine_locator = new RaymarineLocate(this);
-      LOG_INFO(wxT("$$$ RaymarineLocate created"));
-      if (m_raymarine_locator->Run() != wxTHREAD_NO_ERROR) {
-        LOG_INFO(wxT("$$$ RaymarineLocate not started"));
-        wxLogError(wxT("radar_pi: unable to start Raymarine Radar Locator thread"));
-        return 0;
-      }
-    }
+    StartRadarLocators(r);
   }
   // and get rid of any radars we're not using
   for (size_t r = M_SETTINGS.radar_count; r < RADARS; r++) {
@@ -372,6 +355,29 @@ int radar_pi::Init(void) {
  *
  * This should get rid of all on-screen objects and deallocate memory.
  */
+
+void radar_pi::StartRadarLocators(size_t r) {
+  LOG_INFO(wxT("$$$cc StartRadarLocators r= %i "),r);
+  if ((m_radar[r]->m_radar_type == RT_3G || m_radar[r]->m_radar_type == RT_4GA || m_radar[r]->m_radar_type == RT_HaloA) &&
+      m_locator == NULL) {
+    LOG_INFO(wxT("$$$cc navicoLocate to be started"));
+    m_locator = new NavicoLocate(this);
+    LOG_INFO(wxT("$$$cc navicoLocate started"));
+    if (m_locator->Run() != wxTHREAD_NO_ERROR) {
+      wxLogError(wxT("radar_pi: unable to start Navico Radar Locator thread"));
+    }
+  }
+  LOG_INFO(wxT("$$$ type = %i"), m_radar[r]->m_radar_type);
+  if (m_radar[r]->m_radar_type == RM_E120 && m_raymarine_locator == NULL) {
+    LOG_INFO(wxT("$$$cc RaymarineLocate to be created"));
+    m_raymarine_locator = new RaymarineLocate(this);
+    LOG_INFO(wxT("$$$cc RaymarineLocate created"));
+    if (m_raymarine_locator->Run() != wxTHREAD_NO_ERROR) {
+      LOG_INFO(wxT("$$$ RaymarineLocate not started"));
+      wxLogError(wxT("radar_pi: unable to start Raymarine Radar Locator thread"));
+    }
+  }
+}
 
 bool radar_pi::DeInit(void) {
   if (!m_initialized) {
@@ -520,6 +526,7 @@ bool radar_pi::MakeRadarSelection() {
           m_radar[r] = new RadarInfo(this, r);
         }
         m_radar[r]->m_radar_type = (RadarType)i;
+        StartRadarLocators(r);
         r++;
         m_settings.radar_count = r;
         ret = true;
