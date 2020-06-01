@@ -360,7 +360,6 @@ void radar_pi::StartRadarLocators(size_t r) {
   LOG_INFO(wxT("$$$cc StartRadarLocators r= %i "),r);
   if ((m_radar[r]->m_radar_type == RT_3G || m_radar[r]->m_radar_type == RT_4GA || m_radar[r]->m_radar_type == RT_HaloA) &&
       m_locator == NULL) {
-    LOG_INFO(wxT("$$$cc navicoLocate to be started"));
     m_locator = new NavicoLocate(this);
     LOG_INFO(wxT("$$$cc navicoLocate started"));
     if (m_locator->Run() != wxTHREAD_NO_ERROR) {
@@ -369,7 +368,6 @@ void radar_pi::StartRadarLocators(size_t r) {
   }
   LOG_INFO(wxT("$$$ type = %i"), m_radar[r]->m_radar_type);
   if (m_radar[r]->m_radar_type == RM_E120 && m_raymarine_locator == NULL) {
-    LOG_INFO(wxT("$$$cc RaymarineLocate to be created"));
     m_raymarine_locator = new RaymarineLocate(this);
     LOG_INFO(wxT("$$$cc RaymarineLocate created"));
     if (m_raymarine_locator->Run() != wxTHREAD_NO_ERROR) {
@@ -384,7 +382,7 @@ bool radar_pi::DeInit(void) {
     return false;
   }
 
-  LOG_VERBOSE(wxT("radar_pi: DeInit of plugin"));
+  LOG_INFO(wxT("radar_pi: DeInit of plugin"));
 
   m_initialized = false;
 
@@ -427,9 +425,7 @@ bool radar_pi::DeInit(void) {
 
   // Delete the RadarInfo objects. This will call their destructor and delete all data.
   for (size_t r = 0; r < M_SETTINGS.radar_count; r++) {
-    LOG_INFO(wxT("$$$close1"),r);
     delete m_radar[r];
-    LOG_INFO(wxT("$$$close2"), r);
     m_radar[r] = 0;
   }
 

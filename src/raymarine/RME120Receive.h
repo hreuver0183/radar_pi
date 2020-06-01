@@ -46,7 +46,6 @@ class RME120Receive : public RadarReceive {
  public:
   RME120Receive(radar_pi *pi, RadarInfo *ri, NetworkAddress reportAddr, NetworkAddress dataAddr, NetworkAddress sendAddr)
       : RadarReceive(pi, ri) {
-    LOG_INFO(wxT("$$$q RadarReceive starting"));
     m_info.serialNr = wxT(" ");
     m_info.spoke_data_addr = dataAddr;
     m_info.report_addr = reportAddr;
@@ -54,7 +53,7 @@ class RME120Receive : public RadarReceive {
     m_next_spoke = -1;
     m_radar_status = 0;
     m_shutdown_time_requested = 0;
-    // m_is_shutdown = false;
+    m_is_shutdown = false;
     m_first_receive = true;
     m_interface_addr = m_pi->GetRadarInterfaceAddress(ri->m_radar);
     wxString addr1 = m_interface_addr.FormatNetworkAddress();

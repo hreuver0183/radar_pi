@@ -91,7 +91,7 @@ class NavicoReceive : public RadarReceive {
   RadarLocationInfo m_info;
 
   wxLongLong m_shutdown_time_requested;  // Main thread asks this thread to stop
-  volatile bool m_is_shutdown;
+  // volatile bool m_is_shutdown; defined in RadarReceive.h
 
  private:
   void ProcessFrame(const uint8_t *data, size_t len);

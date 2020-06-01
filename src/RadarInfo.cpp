@@ -119,48 +119,26 @@ RadarInfo::RadarInfo(radar_pi *pi, int radar) {
 void RadarInfo::Shutdown() {
   if (m_receive) {
     wxLongLong threadStartWait = wxGetUTCTimeMillis();
+
     m_receive->Shutdown();
     m_receive->Wait();
-    //while (!m_receive->m_is_shutdown) {   // $$$
+    if (m_receive) {
+    }
+    // while (m_receive && !m_receive->m_is_shutdown) {  // $$$
     //  wxYield();
-    //  wxMilliSleep(10);
-    //  LOG_INFO(wxT("$$$24 shutdown radar i"));
+    //  wxMilliSleep(100);
+    //  LOG_INFO(wxT("$$$24 shutdown radar i=%i"),m_radar);
     // /* threadExtraWait = wxGetUTCTimeMillis();*/
     //}
-    LOG_INFO(wxT("$$$23 shutdown radar i"));
     wxLongLong threadEndWait = wxGetUTCTimeMillis();
-
-#ifdef NEVER
-    wxLongLong threadExtraWait = 0;
-
-    // See if Douwe is right and Wait() doesn't work properly -- attests it returns
-    // before the thread is dead.
-    while (!m_receive->m_is_shutdown) {
-      wxYield();
-      wxMilliSleep(10);
-      threadExtraWait = wxGetUTCTimeMillis();
-    }
-
-    // Now log what we have done
-    if (threadExtraWait != 0) {
-      LOG_INFO(wxT("radar_pi: %s receive thread wait did not work, had to wait for %lu ms extra"), m_name.c_str(),
-               threadExtraWait - threadEndWait);
-      threadEndWait = threadExtraWait;
-    }
-    if (m_receive->m_shutdown_time_requested != 0) {
-      LOG_INFO(wxT("radar_pi: %s receive thread stopped in %lu ms, had to wait for %lu ms"), m_name.c_str(),
-               threadEndWait - m_receive->m_shutdown_time_requested, threadEndWait - threadStartWait);
-    } else {
-      LOG_INFO(wxT("radar_pi: %s receive thread stopped in %lu ms, had to wait for %lu ms"), m_name.c_str(),
-               threadEndWait - m_receive->m_shutdown_time_requested, threadEndWait - threadStartWait);
-    }
-#endif
 
     wxLog::FlushActive();  // Flush any log messages written by the thread
     LOG_INFO(wxT("radar_pi: %s receive thread stopped in %llu ms"), m_name.c_str(), threadEndWait - threadStartWait);
 
-    delete m_receive;
-    m_receive = 0;
+    if (m_receive) {
+      delete m_receive;
+      m_receive = 0;
+    }
   }
 
   if (m_control_dialog) {
@@ -260,7 +238,7 @@ bool RadarInfo::Init() {
     m_pi->m_context_menu_control_id[m_radar] = AddCanvasContextMenuItem(m_pi->m_mi3[m_radar], m_pi);
   }
   if (!m_radar_panel) {
-    LOG_INFO(wxT("$$$x creating radarpanel for radar %s"), m_name.c_str());
+    LOG_VERBOSE(wxT("$$$ creating radarpanel for radar %s"), m_name.c_str());
     m_radar_panel = new RadarPanel(m_pi, this, m_pi->m_parent_window);
     if (!m_radar_panel || !m_radar_panel->Create()) {
       wxLogError(wxT("radar_pi %s: Unable to create RadarPanel"), m_name.c_str());
@@ -1054,30 +1032,30 @@ wxString RadarInfo::GetCanvasTextTopLeft() {
 wxString RadarInfo::FormatDistance(double distance) {
   wxString s;
 
-  switch (m_pi->m_settings.range_units) { 
-    case 0:     // Mixed
-          if (distance < 0.25 * 1.852) {
-            int meters = distance * 1852.0;
-            s << meters;
-            s << "m";
-          } else {
-            s << wxString::Format(wxT("%.2fNM"), distance);
-          }
-          break;
+  switch (m_pi->m_settings.range_units) {
+    case 0:  // Mixed
+      if (distance < 0.25 * 1.852) {
+        int meters = distance * 1852.0;
+        s << meters;
+        s << "m";
+      } else {
+        s << wxString::Format(wxT("%.2fNM"), distance);
+      }
+      break;
 
-    case 1:   // km
-          distance *= 1.852;
-          if (distance < 1.000) {
-            int meters = distance * 1000.0;
-            s << meters;
-            s << "m";
-          } else {
-            s << wxString::Format(wxT("%.2fkm"), distance);
-          }
-          break;
+    case 1:  // km
+      distance *= 1.852;
+      if (distance < 1.000) {
+        int meters = distance * 1000.0;
+        s << meters;
+        s << "m";
+      } else {
+        s << wxString::Format(wxT("%.2fkm"), distance);
+      }
+      break;
 
-    default:  // nm  
-          s << wxString::Format(wxT("%.2fNM"), distance);
+    default:  // nm
+      s << wxString::Format(wxT("%.2fNM"), distance);
   }
 
   return s;
