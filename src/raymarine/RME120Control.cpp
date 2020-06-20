@@ -36,8 +36,8 @@
 PLUGIN_BEGIN_NAMESPACE
 
 RME120Control::RME120Control() {
-  /*m_radar_socket = INVALID_SOCKET;
-  m_name = wxT("Navico radar");*/
+  m_radar_socket = INVALID_SOCKET;
+  m_name = wxT("RME120 radar");
 }
 
 RME120Control::~RME120Control() {
@@ -57,8 +57,6 @@ bool RME120Control::Init(radar_pi *pi, RadarInfo *ri, NetworkAddress &ifadr, Net
   if (radaradr.port != 0) {
     // Null
   }
-
-  LOG_INFO(wxT("$$$$ init control"));
 
   m_pi = pi;
   m_ri = ri;
@@ -80,16 +78,12 @@ bool RME120Control::Init(radar_pi *pi, RadarInfo *ri, NetworkAddress &ifadr, Net
     r = ::bind(m_radar_socket, (struct sockaddr *)&s, sizeof(s));
   }
 
-  LOG_INFO(wxT("$$$ tx socket r=%i "), r);
-
   if (r) {
     wxLogError(wxT("radar_pi: Unable to create UDP sending socket"));
     LOG_INFO(wxT("$$$ tx socketerror "));
     // Might as well give up now
     return false;
   }
-
-  LOG_INFO(wxT("radar_pi: %s $$$$transmit socket open log tx"), m_name.c_str());
   return true;
 }
 

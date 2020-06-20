@@ -50,7 +50,6 @@ PLUGIN_BEGIN_NAMESPACE
 //
 
 class NavicoLocate : public wxThread {
-#define MAX_REPORT 10
  public:
   NavicoLocate(radar_pi *pi) : wxThread(wxTHREAD_JOINABLE) {
     Create(64 * 1024);  // Stack size

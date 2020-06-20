@@ -50,7 +50,7 @@ PLUGIN_BEGIN_NAMESPACE
 //
 
 class RaymarineLocate : public wxThread {
-#define MAX_REPORT 10
+#define MAX_REPORT 3
  public:
   RaymarineLocate(radar_pi *pi) : wxThread(wxTHREAD_JOINABLE) {
     Create(64 * 1024);  // Stack size

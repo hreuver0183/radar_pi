@@ -213,17 +213,13 @@ bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const N
     // radar_address.port = ntohs(rRec->radar_port);
 
     RadarLocationInfo infoA;
-    wxString sernr = wxT(" ");
-    infoA.serialNr = sernr;  // empty
-   // infoA.spoke_data_addr = NetworkAddress(rRec->radar_ip);
+    infoA.serialNr = wxT(" ");  // empty
     infoA.spoke_data_addr.addr.s_addr = ntohl(rRec->mcast_ip);
     infoA.spoke_data_addr.port = ntohs(rRec->mcast_port);
     infoA.report_addr.addr.s_addr = ntohl(rRec->mcast_ip);
     infoA.report_addr.port = ntohs(rRec->mcast_port);
     infoA.send_command_addr.addr.s_addr = ntohl(rRec->mcast_ip);
     infoA.send_command_addr.port = ntohs(rRec->mcast_port);
-   /* infoA.report_addr = NetworkAddress(rRec->radar_ip);
-    infoA.send_command_addr = NetworkAddress(data->addrSendA);*/
     NetworkAddress radar_ipA = radar_address;
     radar_ipA.port = htons(RO_PRIMARY);
     if (m_report_count < MAX_REPORT) {
@@ -233,7 +229,6 @@ bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const N
     else {
       LOG_RECEIVE(wxT("radar_pi: $$$Located radar IP %s, interface %s [%s]"), radar_ipA.FormatNetworkAddressPort(), interface_address.FormatNetworkAddress(), infoA.to_string());
     }
-    LOG_INFO(wxT("radar_pi: $$$ radar_ipA"));
     m_pi->FoundRaymarineRadarInfo(radar_ipA, interface_address, infoA);
     return true;
   }

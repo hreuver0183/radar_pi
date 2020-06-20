@@ -307,7 +307,7 @@ void RadarInfo::DetectedRadar(NetworkAddress &interfaceAddress, NetworkAddress &
     if (!m_control->Init(m_pi, this, interfaceAddress, radarAddress)) {
       wxLogError(wxT("radar_pi %s: Unable to create transmit socket"), m_name.c_str());
     } else {
-      wxLogError(wxT("radar_pi %s: Unable to create transmit socket-2"), m_name.c_str());
+      LOG_TRANSMIT(wxT("radar_pi %s: Created transmit socket"), m_name.c_str());
     }
   }
   m_stayalive_timeout = 0;  // Allow immediate restart of any TxOn or TxOff command
