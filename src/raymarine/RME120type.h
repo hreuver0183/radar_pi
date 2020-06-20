@@ -43,7 +43,7 @@ DEFINE_RADAR(RM_E120,                                                     /* Typ
              wxT("Raymarine E120"),                                       /* Name */
              RM_E120_SPOKES,                                              /* Spokes */
              RM_E120_SPOKE_LEN,                                           /* Spoke length (max) */             
-             RME120ControlsDialog(RT_3G),                                 /* ControlsDialog class constructor */
+             RME120ControlsDialog(RM_E120),                                 /* ControlsDialog class constructor */
              RME120Receive(pi, ri, report, data, send),                                       /* Receive class constructor */
              RME120Control(),                                             /* Send/Control class constructor */
              RO_SINGLE /* This type only has a single radar and does not need locating */

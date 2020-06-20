@@ -69,6 +69,7 @@ class RadarInfo {
   RadarType m_radar_type;  // Which radar type
   size_t m_spokes;         // # of spokes per rotation
   size_t m_spoke_len_max;  // Max # of bytes per spoke
+
   NetworkAddress m_radar_address; // current network address of the radar. Only when radar has been seen. Only used for Raymarine
 
   // Digital radars cannot produce just any range. When asked for a particular value
@@ -131,7 +132,7 @@ class RadarInfo {
   RadarControlItem m_doppler;
   RadarControlItem m_tune_fine;       // Following added for Raymarine E120
   RadarControlItem m_tune_coarse;
-  RadarControlItem m_mbs;             // Main bang suppression for Raymarine E120. 0 is OFF, 1 is ON
+  RadarControlItem m_main_bang_suppression;  // Main bang suppression for Raymarine E120. 0 is OFF, 1 is ON
   RadarControlItem m_warmup_time;
   RadarControlItem m_signal_strength;
   RadarControlItem m_display_timing;
@@ -140,6 +141,8 @@ class RadarInfo {
   RadarControlItem m_magnetron_hours;
   RadarControlItem m_rotation_period;
   RadarControlItem m_stc_curve;
+  RadarControlItem m_fine_tune;
+  RadarControlItem m_coarse_tune;
 
   bool m_showManualValueInAuto;  // Does radar adjust manual value in auto mode? True for Garmin, False for others
   bool m_timed_idle_hardware;    // Does radar handle timed idle itself?

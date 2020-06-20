@@ -39,7 +39,7 @@
 PLUGIN_BEGIN_NAMESPACE
 
 //
-// An intermediary class that implements the common parts of any Navico radar.
+// An intermediary class that implements the common parts of some radars.
 //
 
 class RME120Receive : public RadarReceive {
@@ -87,30 +87,18 @@ class RME120Receive : public RadarReceive {
   void *Entry(void);
   void Shutdown(void);
   wxString GetInfoStatus();
-
-  // From rmradar_pi:
-  void ProcessFeedback(const UINT8 *data, int len);
-  int m_range_meters, m_updated_range;
-  void ProcessPresetFeedback(const UINT8 *data, int len);
-  void ProcessCurveFeedback(const UINT8 *data, int len);
-  void ProcessScanData(const UINT8 *data, int len);
-  void RME120Receive::Send1sKeepalive();
-
-      public : NetworkAddress m_interface_addr;
+  
+  NetworkAddress m_interface_addr;
   RadarLocationInfo m_info;
 
   wxLongLong m_shutdown_time_requested;  // Main thread asks this thread to stop
-                                         // volatile bool m_is_shutdown;
+  volatile bool m_is_shutdown;
 
  private:
   void ProcessFrame(const uint8_t *data, size_t len);
-  bool ProcessReport(const uint8_t *data, size_t len);
 
   SOCKET PickNextEthernetCard();
   SOCKET GetNewReportSocket();
-  SOCKET GetNewDataSocket();
-
-  void UpdateSendCommand();
 
   SOCKET m_receive_socket;  // Where we listen for message from m_send_socket
   SOCKET m_send_socket;     // A message to this socket will interrupt select() and allow immediate shutdown
@@ -126,14 +114,15 @@ class RME120Receive : public RadarReceive {
   wxString m_status;         // Userfriendly string
   wxString m_firmware;       // Userfriendly string #2
 
-  void SetInfoStatus(wxString status) {
-    wxCriticalSectionLocker lock(m_lock);
-    m_status = status;
-  }
-  void SetFirmware(wxString s) {
-    wxCriticalSectionLocker lock(m_lock);
-    m_firmware = s;
-  }
+  void ProcessFeedback(const UINT8 *data, int len);
+  int m_range_meters, m_updated_range;
+  void ProcessPresetFeedback(const UINT8 *data, int len);
+  void ProcessCurveFeedback(const UINT8 *data, int len);
+  void ProcessScanData(const UINT8 *data, int len);
+  
+  void SetFirmware(wxString s);
+  void SetRadarType(RadarType t);
+  void UpdateSendCommand();
 };
 
 PLUGIN_END_NAMESPACE

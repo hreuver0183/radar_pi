@@ -236,6 +236,10 @@ int radar_pi::Init(void) {
   m_settings.threshold_red = 255;
   m_settings.threshold_green = 255;
   CLEAR_STRUCT(m_settings.radar_interface_address);
+  CLEAR_STRUCT(m_settings.navico_radar_info);
+  for (size_t r = 0; r < RADARS; r++) {
+    m_settings.navico_radar_info[r].serialNr = wxT(" ");
+  } 
   m_settings.radar_count = 0;
 
   // Get a pointer to the opencpn display canvas, to use as a parent for the UI
@@ -291,7 +295,6 @@ int radar_pi::Init(void) {
                                   _("Radar plugin with support for multiple radars"), NULL, RADAR_TOOL_POSITION, 0, this);
 
   // CacheSetToolbarToolBitmaps(BM_ID_RED, BM_ID_BLANK);
-
   // Now that the settings are made we can initialize the RadarInfos
   for (size_t r = 0; r < M_SETTINGS.radar_count; r++) {
     m_radar[r]->Init();
@@ -299,7 +302,7 @@ int radar_pi::Init(void) {
   }
   // and get rid of any radars we're not using
   for (size_t r = M_SETTINGS.radar_count; r < RADARS; r++) {
-    delete m_radar[r];
+    if (m_radar[r]) delete m_radar[r];
     m_radar[r] = 0;
   }
 
@@ -357,21 +360,16 @@ int radar_pi::Init(void) {
  */
 
 void radar_pi::StartRadarLocators(size_t r) {
-  LOG_INFO(wxT("$$$cc StartRadarLocators r= %i "),r);
   if ((m_radar[r]->m_radar_type == RT_3G || m_radar[r]->m_radar_type == RT_4GA || m_radar[r]->m_radar_type == RT_HaloA) &&
       m_locator == NULL) {
     m_locator = new NavicoLocate(this);
-    LOG_INFO(wxT("$$$cc navicoLocate started"));
     if (m_locator->Run() != wxTHREAD_NO_ERROR) {
       wxLogError(wxT("radar_pi: unable to start Navico Radar Locator thread"));
     }
   }
-  LOG_INFO(wxT("$$$ type = %i"), m_radar[r]->m_radar_type);
   if (m_radar[r]->m_radar_type == RM_E120 && m_raymarine_locator == NULL) {
     m_raymarine_locator = new RaymarineLocate(this);
-    LOG_INFO(wxT("$$$cc RaymarineLocate created"));
     if (m_raymarine_locator->Run() != wxTHREAD_NO_ERROR) {
-      LOG_INFO(wxT("$$$ RaymarineLocate not started"));
       wxLogError(wxT("radar_pi: unable to start Raymarine Radar Locator thread"));
     }
   }
@@ -400,7 +398,6 @@ bool radar_pi::DeInit(void) {
   if (m_raymarine_locator) {
     m_raymarine_locator->Shutdown();
     m_raymarine_locator->Wait();
-    LOG_INFO(wxT(" $$$shutdown raymarine locate"));
   }
 
   // Stop processing in all radars.
@@ -1431,7 +1428,7 @@ bool radar_pi::LoadConfig(void) {
       pConf->Read(wxString::Format(wxT("Radar%dAddress"), r), &s, "0.0.0.0");
       radar_inet_aton(s.c_str(), &m_settings.radar_address[n].addr);
       m_settings.radar_address[n].port = htons(RadarOrder[ri->m_radar_type]);
-      pConf->Read(wxString::Format(wxT("Radar%dNavicoInfo"), r), &s, "");
+      pConf->Read(wxString::Format(wxT("Radar%dNavicoInfo"), r), &s, " ");
       m_settings.navico_radar_info[r] = RadarLocationInfo(s);
 
       pConf->Read(wxString::Format(wxT("Radar%dRange"), r), &v, 2000);
@@ -1605,7 +1602,6 @@ bool radar_pi::SaveConfig(void) {
     pConf->Write(wxT("DockSize"), m_settings.dock_size);
 
     for (int r = 0; r < (int)m_settings.radar_count; r++) {
-      LOG_INFO(wxT(" $$$ write navico info %s"), m_settings.navico_radar_info[r].to_string());
       pConf->Write(wxString::Format(wxT("Radar%dType"), r), RadarTypeName[m_radar[r]->m_radar_type]);
       pConf->Write(wxString::Format(wxT("Radar%dNavicoInfo"), r), m_settings.navico_radar_info[r].to_string());
       pConf->Write(wxString::Format(wxT("Radar%dAddress"), r), m_settings.radar_address[r].FormatNetworkAddress());
@@ -1660,6 +1656,7 @@ void radar_pi::SetNavicoRadarInfo(size_t r, const RadarLocationInfo &info) {
 
 void radar_pi::FoundNavicoRadarInfo(const NetworkAddress &addr, const NetworkAddress &interface_addr, const RadarLocationInfo &info) {
   wxCriticalSectionLocker lock(m_exclusive);
+  LOG_INFO(wxT("$$$ FoundNavicoRadarInfo"));
 
   bool halo_type = false;
   int radar_order[RT_MAX];
@@ -1808,7 +1805,6 @@ size_t r = (size_t)ray_nr;
 
 SetNavicoRadarInfo(r, info);
 SetRadarInterfaceAddress(r, int_face_addr, radar_addr);
-LOG_INFO(wxT(" radar_pi: $$$Raymarine radarinfo written"));
 return;
 }
 

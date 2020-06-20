@@ -536,7 +536,6 @@ void ControlsDialog::CreateControls() {
 
   wxBoxSizer* testBox = new wxBoxSizer(wxVERTICAL);
   m_top_sizer->Add(testBox, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, BORDER);
-
   wxString label;
   label << _("Scan speed") << wxT("\n");
   label << _("Installation") << wxT("\n");
@@ -685,6 +684,30 @@ void ControlsDialog::CreateControls() {
     m_advanced_sizer->Add(m_target_expansion_button, 0, wxALL, BORDER);
   }
 
+  // The STC button
+  if (m_ctrl[CT_STC].type) {
+    m_stc_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("STC"), m_ctrl[CT_STC], &m_ri->m_stc);
+    m_advanced_sizer->Add(m_stc_button, 0, wxALL, BORDER);
+  }
+
+   // The Fine tune button
+  if (m_ctrl[CT_FT].type) {
+    m_fine_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Fine tune"), m_ctrl[CT_FT], &m_ri->m_fine_tune);
+    m_advanced_sizer->Add(m_fine_tune_button, 0, wxALL, BORDER);
+  }
+
+   // The Cloarse tune button
+  if (m_ctrl[CT_CT].type) {
+    m_coarse_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Coarse tune"), m_ctrl[CT_CT], &m_ri->m_coarse_tune);
+    m_advanced_sizer->Add(m_coarse_tune_button, 0, wxALL, BORDER);
+  }
+
+   // The STC curve button
+  if (m_ctrl[CT_STC_CURVE].type) {
+    m_stc_curve_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("STC curve"), m_ctrl[CT_STC_CURVE], &m_ri->m_stc_curve);
+    m_advanced_sizer->Add(m_stc_curve_button, 0, wxALL, BORDER);
+  }
+
   // The REJECTION button
 
   if (m_ctrl[CT_INTERFERENCE_REJECTION].type) {
@@ -739,6 +762,19 @@ void ControlsDialog::CreateControls() {
     m_bearing_alignment_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Bearing alignment"),
                                                         m_ctrl[CT_BEARING_ALIGNMENT], &m_ri->m_bearing_alignment);
     m_installation_sizer->Add(m_bearing_alignment_button, 0, wxALL, BORDER);
+  }
+
+  // The DISPLAY TIMING button
+  if (m_ctrl[CT_DISPLAY_TIMING].type) {
+    m_display_timing_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Display timing"), m_ctrl[CT_DISPLAY_TIMING], &m_ri->m_display_timing);
+    m_installation_sizer->Add(m_display_timing_button, 0, wxALL, BORDER);
+  }
+
+  // The MAINBANG SUPPRESSION button
+  if (m_ctrl[CT_MAIN_BANG_SUPPRESSION].type) {
+    m_main_bang_suppression_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Main bang suppression"),
+                                                            m_ctrl[CT_MAIN_BANG_SUPPRESSION], &m_ri->m_main_bang_suppression);
+    m_installation_sizer->Add(m_main_bang_suppression_button, 0, wxALL, BORDER);
   }
 
   // The NO TRANSMIT START button

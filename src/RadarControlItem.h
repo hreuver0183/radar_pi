@@ -99,16 +99,6 @@ class RadarControlItem {
       m_button_s = s;
     }
     m_value = v;
-    /*if (v <= m_max && v >= m_min) {  // this lot is crashing
-      m_value = v;
-      m_button_s = s;
-    } else if (v >= m_max){
-      m_value = m_max;
-      m_button_s = s;
-    } else if (v < m_min){
-      m_value = m_min;
-      m_button_s = s;
-    }*/
     m_state = s;
   };
 

@@ -181,7 +181,7 @@ void *RaymarineLocate::Entry(void) {
 }
 
 
-#pragma pack(pop)
+#pragma pack(push, 1)
 
 struct SRMRadarFunc {
   uint32_t type;
@@ -194,7 +194,7 @@ struct SRMRadarFunc {
   uint32_t radar_ip;
   uint32_t radar_port;
 };	
-
+#pragma pack(pop)
 
 bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const NetworkAddress &interface_address,
                                     const uint8_t *report, size_t len) {

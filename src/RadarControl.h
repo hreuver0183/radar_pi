@@ -52,6 +52,7 @@ class RadarControl {
    */
   virtual bool Init(radar_pi *pi, RadarInfo *ri, NetworkAddress &interfaceAddress, NetworkAddress &radarAddress) = 0;
 
+  struct sockaddr_in m_addr;
   /*
    * Ask the radar to switch off.
    */
@@ -68,7 +69,7 @@ class RadarControl {
    *
    * @returns   true on success, false on failure.
    */
-  virtual bool RadarStayAlive() { return true; };
+  virtual bool RadarStayAlive() { return true; };  // $$$???
 
   /*
    * Set the range to the given range in meters.
@@ -87,6 +88,8 @@ class RadarControl {
    * @returns   true on success, false on failure.
    */
   virtual bool SetControlValue(ControlType controlType, RadarControlItem &item, RadarControlButton *button) = 0;
+  void SetMultiCastAddress(NetworkAddress sendMultiCastAddress) { m_addr = sendMultiCastAddress.GetSockAddrIn(); }
+
 };
 
 PLUGIN_END_NAMESPACE

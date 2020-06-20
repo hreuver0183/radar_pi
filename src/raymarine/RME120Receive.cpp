@@ -52,7 +52,7 @@ PLUGIN_BEGIN_NAMESPACE
 // Raymarine radars use an internal spoke ID that has range [0..4096> but they
 // only send half of them
 //
-#define SPOKES (4096)  //$$$
+#define SPOKES (4096)
 #define SCALE_RAW_TO_DEGREES(raw) ((raw) * (double)DEGREES_PER_ROTATION / SPOKES)
 #define SCALE_DEGREES_TO_RAW(angle) ((int)((angle) * (double)SPOKES / DEGREES_PER_ROTATION))
 
@@ -101,19 +101,11 @@ SOCKET RME120Receive::GetNewReportSocket() {
   wxString error = wxT("");
   wxString s = wxT("");
 
-  LOG_INFO(wxT("radar_pi: %s $$$GetNewReportSocket  %s "), m_ri->m_name, m_info.to_string());
-  wxString addr1 = m_interface_addr.FormatNetworkAddress();
-  LOG_INFO(wxT("$$$0 GetNewReportSocket m_interface_addr=%s "), addr1);
-
   if (!(m_info == m_pi->GetNavicoRadarInfo(m_ri->m_radar))) {  // initial values or NavicoLocate modified the info
-    
     m_info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);
-    LOG_INFO(wxT("radar_pi: %s $$$2GetNewReportSocket  %s "), m_ri->m_name, m_info.to_string());
     m_interface_addr = m_pi->GetRadarInterfaceAddress(m_ri->m_radar);
-    addr1 = m_interface_addr.FormatNetworkAddress();
-    LOG_INFO(wxT("$$$ GetNewReportSocket m_interface_addr=%s "), addr1);
     UpdateSendCommand();
-    LOG_INFO(wxT("radar_pi: %s $$$Locator found radar at IP %s [%s]"), m_ri->m_name,
+    LOG_INFO(wxT("radar_pi: %s Locator found radar at IP %s [%s]"), m_ri->m_name,
              M_SETTINGS.radar_address[m_ri->m_radar].FormatNetworkAddressPort(), m_info.to_string());
   };
 
@@ -127,19 +119,17 @@ SOCKET RME120Receive::GetNewReportSocket() {
       s << _("Serial #") << m_info.serialNr << wxT("\n");
     }
   }
-  addr1 = m_interface_addr.FormatNetworkAddress();
-  LOG_INFO(wxT("$$$1 GetNewReportSocket address of report socket m_interface_addr=%s "), addr1);
+
   socket = startUDPMulticastReceiveSocket(m_interface_addr, m_info.report_addr, error);
 
   if (socket != INVALID_SOCKET) {
     wxString addr = m_interface_addr.FormatNetworkAddress();
     wxString rep_addr = m_info.report_addr.FormatNetworkAddressPort();
 
-    LOG_RECEIVE(wxT("radar_pi: %s $$$scanning interface %s for data from %s"), m_ri->m_name, addr.c_str(), rep_addr.c_str());
+    LOG_RECEIVE(wxT("radar_pi: %s scanning interface %s for data from %s"), m_ri->m_name, addr.c_str(), rep_addr.c_str());
 
     s << _("Scanning interface") << wxT(" ") << addr;
     SetInfoStatus(s);
-    LOG_INFO(wxT("$$$1 na info status address of report socket m_interface_addr=%s "), addr);
   } else {
     s << error;
     SetInfoStatus(s);
@@ -147,6 +137,7 @@ SOCKET RME120Receive::GetNewReportSocket() {
   }
   return socket;
 }
+
 
 /*
  * Entry
@@ -164,7 +155,7 @@ void *RME120Receive::Entry(void) {
   } rx_addr;
   socklen_t rx_len;
 
-  uint8_t data[2048/*sizeof(radar_frame_pkt)*/];  // $$$ ??
+  uint8_t data[2048];  // largest packet seen so far from a Raymarine is 626
   m_interface_array = 0;
   m_interface = 0;
   struct sockaddr_in radarFoundAddr;
@@ -222,7 +213,7 @@ void *RME120Receive::Entry(void) {
           radar_address.port = rx_addr.ipv4.sin_port;
 
           ProcessFrame(data, (size_t)r);
-            if (!radar_addr) {  // $$$ ???
+            if (!radar_addr) {
               wxCriticalSectionLocker lock(m_lock);
               m_ri->DetectedRadar(m_interface_addr, radar_address);  // enables transmit data
               UpdateSendCommand();
@@ -293,33 +284,21 @@ void *RME120Receive::Entry(void) {
   LOG_VERBOSE(wxT("radar_pi: %s receive thread sleeping"), m_ri->m_name.c_str());
   wxMilliSleep(1000);
 #endif
-  LOG_VERBOSE(wxT("radar_pi: %s $$$receive thread stopping"), m_ri->m_name.c_str());
   m_is_shutdown = true;
   return 0;
 }
 
-//void RME120Receive::SetRadarType(RadarType t) {
+//void RME120Receive::SetRadarType(RadarType t) {  // $$$
 //  m_ri->m_radar_type = t;
 //  // m_pi->m_pMessageBox->SetRadarType(t);
 //}
 
-void RME120Receive::UpdateSendCommand() {
 
-  return; // $$$
-
-  if (!m_info.send_command_addr.IsNull() && m_ri->m_control) {
-    RME120Control *control = (RME120Control *)m_ri->m_control;
-    control->SetMultiCastAddress(m_info.send_command_addr);
-  }
-}
 
 void RME120Receive::ProcessFrame(const UINT8 *data, size_t len) {   // This is the original ProcessFrame from RMradar_pi
   wxLongLong nowMillis = wxGetLocalTimeMillis();
   time_t now = time(0);
   m_ri->resetTimeout(now);
-
-  LOG_INFO(wxT("$$$ processframe1"));
-
 
   /*if (m_quit || !m_pi->m_initialized) {
     return;
@@ -360,14 +339,12 @@ void RME120Receive::ProcessFrame(const UINT8 *data, size_t len) {   // This is t
   }
 }
 
-
-
-//static void AppendChar16String(wxString &dest, uint16_t *src) {
-//  for (; *src; src++) {
-//    wchar_t wc = (wchar_t)*src;
-//    dest << wc;
-//  }
-//}
+void RME120Receive::UpdateSendCommand() {
+  if (!m_info.send_command_addr.IsNull() && m_ri->m_control) {  // $$$ to be tested
+    RadarControl *control = (RadarControl *)m_ri->m_control;
+    control->SetMultiCastAddress(m_info.send_command_addr);
+  }
+}
 
 #pragma pack(push, 1)
 
@@ -495,7 +472,7 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
           current_ranges[i] = fbPtr->range_values[i];
           radar_ranges[i] = 1852 * fbPtr->range_values[i] / 500;
 
-          wxLogMessage(wxT("$$$radar ranges %d (%d)\n"), current_ranges[i], radar_ranges[i]);
+          wxLogMessage(wxT("$$$radar ranges %d (%d)\n"), current_ranges[i], radar_ranges[i]);  //  get ranges from type/h
         }
       }
       if (radar_ranges[fbPtr->range_id] != m_range_meters) {
@@ -509,32 +486,34 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
         m_ri->m_range.Update(m_range_meters / 2);  // RM MFD shows half of what is received
       }
 
-      m_ri->m_gain.Update(fbPtr->gain);
-      //m_gain.SetActive(fbPtr->auto_gain == 0);  $$$
-      m_ri->m_sea.Update(fbPtr->sea_value);
-     // m_ri->m_sea.SetActive(fbPtr->auto_sea == 0);   $$$
-     // m_ri->m_autoSea.Update(fbPtr->auto_sea);
-    //  m_ri->m_autoSea.SetActive(fbPtr->auto_sea != 0);
 
-     // m_ri->m_rain.Update(fbPtr->rain_enabled == 1);  $$$
+      RadarControlState state;
+      state = (fbPtr->auto_gain > 0) ? RCS_AUTO_1 : RCS_MANUAL;
+      m_ri->m_gain.Update(fbPtr->gain, state);
+            
+      state = (fbPtr->auto_sea > 0) ? RCS_AUTO_1 : RCS_MANUAL;
+      state = (RadarControlState) fbPtr->auto_sea;
+      m_ri->m_sea.UpdateState(state);
+     
       m_ri->m_rain.Update(fbPtr->rain_value);
 
       m_ri->m_target_expansion.Update(fbPtr->target_expansion);
       m_ri->m_interference_rejection.Update(fbPtr->interference_rejection);
 
-     /* int ba = (int)fbPtr->bearing_offset;   $$$
-      m_bearingOffset.Update(ba);*/
+      int ba = (int)fbPtr->bearing_offset;
+      m_ri->m_bearing_alignment.Update(ba);
 
-     // m_tuneFine.Update Active(fbPtr->auto_tune == 0);  $$$
-      m_ri->m_tune_fine.Update(fbPtr->tune);
-      //m_tuneCoarse.SetActive(fbPtr->auto_tune == 0);  $$$
+     state = (fbPtr->auto_tune > 0) ? RCS_AUTO_1 : RCS_MANUAL;
+      m_ri->m_tune_fine.Update(fbPtr->tune, state);
 
-      m_ri->m_mbs.Update(fbPtr->mbs_enabled);
+      state = (fbPtr->auto_tune > 0) ? RCS_AUTO_1 : RCS_MANUAL;
+      m_ri->m_tune_coarse.UpdateState(state);
+
+      m_ri->m_main_bang_suppression.Update(fbPtr->mbs_enabled);
 
       m_ri->m_warmup_time.Update(fbPtr->warmup_time);
       m_ri->m_signal_strength.Update(fbPtr->signal_strength);
 
-     // m_ftc.UpdateActive(fbPtr->ftc_enabled == 1);
       m_ri->m_ftc.Update(fbPtr->ftc_value);
 
       /*if (m_ri->m_control_dialog) {
@@ -549,7 +528,9 @@ void RME120Receive::ProcessPresetFeedback(const UINT8 *data, int len) {
   if (len == sizeof(SRadarPresetFeedback)) {
     SRadarPresetFeedback *fbPtr = (SRadarPresetFeedback *)data;
 
-   /* m_tuneCoarse.Update(fbPtr->coarse_tune_value);   $$$ to do
+    // In this system max en min values are fixed
+
+   /* m_tuneCoarse.Update(fbPtr->coarse_tune_value);
     m_stc.Update(fbPtr->stc_preset_value);
     m_displayTiming.Update(fbPtr->display_timing_value);
     m_stc.UpdateMax(fbPtr->stc_preset_max);
@@ -572,34 +553,36 @@ void RME120Receive::ProcessPresetFeedback(const UINT8 *data, int len) {
 void RME120Receive::ProcessCurveFeedback(const UINT8 *data, int len) {
   if (len == sizeof(SCurveFeedback)) {
     SCurveFeedback *fbPtr = (SCurveFeedback *)data;
-    /*switch (fbPtr->curve_value) {
+
+    // better replace this with a translatio table
+    switch (fbPtr->curve_value) {
       case 0:
-        m_stcCurve.Set(1);
+        m_ri->m_stc_curve.Update(1);
         break;
       case 1:
-        m_stcCurve.Set(2);
+        m_ri->m_stc_curve.Update(2);
         break;
       case 2:
-        m_stcCurve.Set(3);
+        m_ri->m_stc_curve.Update(3);
         break;
       case 4:
-        m_stcCurve.Set(4);
+        m_ri->m_stc_curve.Update(4);
         break;
       case 6:
-        m_stcCurve.Set(5);
+        m_ri->m_stc_curve.Update(5);
         break;
       case 8:
-        m_stcCurve.Set(6);
+        m_ri->m_stc_curve.Update(6);
         break;
       case 10:
-        m_stcCurve.Set(7);
+        m_ri->m_stc_curve.Update(7);
         break;
       case 13:
-        m_stcCurve.Set(8);
+        m_ri->m_stc_curve.Update(8);
         break;
       default:
         fprintf(stderr, "ProcessCurveFeedback: unknown curve value %d.\n", (int)fbPtr->curve_value);
-    }*/
+    }
   } else {
     fprintf(stderr, "ProcessCurveFeedback: got %d bytes, expected %d.\n", len, (int)sizeof(SCurveFeedback));
   }
@@ -666,12 +649,12 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
     if (pHeader->something_4 == 0x400) {
       if (strange_radar_type != RT_4GA) {
         strange_radar_type = RT_4GA;
-        LOG_INFO(wxT("$$$ radartype RT_4GA set ???"));
+        LOG_RECEIVE(wxT(" radartype RT_4GA set ???"));
         //m_pi->m_pMessageBox->SetRadarType(RT_4GA);
       }
     } else {
       if (strange_radar_type != RM_E120) {   // RT_BR24 before
-        LOG_INFO(wxT("$$$ radartype3"));
+        LOG_RECEIVE(wxT(" radartype3"));
         strange_radar_type = RM_E120;
         //m_pi->m_pMessageBox->SetRadarType(RT_BR24);
       }
@@ -684,7 +667,8 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
     while (nextOffset < len) {
       CRMScanHeader *sHeader = (CRMScanHeader *)(data + nextOffset);
       if (sHeader->type != 0x00000001 || sHeader->length != 0x00000028) {
-        LOG_INFO(wxT("$$$ProcessScanData::Scan header #%d (%d) - %x, %x.\n"), headerIdx, nextOffset, sHeader->type, sHeader->length);
+        LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d (%d) - %x, %x.\n"), headerIdx, nextOffset, sHeader->type,
+                    sHeader->length);
         break;
       }
 
@@ -692,20 +676,16 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
           sHeader->something_5 != 0x00000001 || sHeader->something_6 != 0x000001f4 || sHeader->something_7 != 0x00000001) {
         if (sHeader->something_2 != 3 || sHeader->something_3 != 2 || sHeader->something_4 != 3 || sHeader->something_5 != 0 ||
             sHeader->something_6 != 0 || sHeader->something_7 != 1) {
-          LOG_INFO(wxT("$$$ProcessScanData::Scan header #%d part 2 check failed.\n"), headerIdx);
+            LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d part 2 check failed.\n"), headerIdx);
           break;
         } else if (strange_radar_type != RT_4GA) {
-          LOG_INFO(wxT("$$$ radartype set RT_4GA"));
-          strange_radar_type = RT_4GA;
-         // m_pi->m_pMessageBox->SetRadarType(8);
-          LOG_INFO(wxT("$$$ProcessScanData::Scan header #%d HD second header with regular first.\n"), headerIdx);
+          strange_radar_type = RT_4GA;         
+          LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d HD second header with regular first.\n"), headerIdx);
         }
 
       } else if (strange_radar_type != RM_E120) {
-        LOG_INFO(wxT("$$$ radartype5"));
         strange_radar_type = RM_E120;
-       // m_pi->m_pMessageBox->SetRadarType(RT_BR24);
-        LOG_INFO(wxT("$$$ProcessScanData::Scan header #%d regular second header with HD first.\n"), headerIdx);
+        LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d regular second header with HD first.\n"), headerIdx);
       }
 
       nextOffset += sizeof(CRMScanHeader);
@@ -713,7 +693,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
       CRMRecordHeader *nHeader = (CRMRecordHeader *)(data + nextOffset);
       if (nHeader->type == 0x00000002) {
         if (nHeader->length != 0x0000001c) {
-          LOG_INFO(wxT("$$$ProcessScanData::Opt header #%d part 2 check failed.\n"), headerIdx);
+          LOG_RECEIVE(wxT("ProcessScanData::Opt header #%d part 2 check failed.\n"), headerIdx);
         }
         nextOffset += nHeader->length;
       }
@@ -721,8 +701,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
       CRMScanData *pSData = (CRMScanData *)(data + nextOffset);
 
       if ((pSData->type & 0x7fffffff) != 0x00000003 || pSData->length < pSData->data_len + 8) {
-        LOG_INFO(wxT("$$$ProcessScanData::Scan data header #%d check failed %x, %d, %d.\n"), headerIdx, pSData->type, pSData->length,
-                pSData->data_len);
+        LOG_RECEIVE(wxT("ProcessScanData::Scan data header #%d check failed %x, %d, %d.\n"), headerIdx, pSData->type, pSData->length, pSData->data_len);
         break;
       }
       UINT8 unpacked_data[1024], *dataPtr = 0;
@@ -732,7 +711,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
 
         int iS = 0;
         int iD = 0;
-        while (iS < pSData->data_len) {
+        while (iS < (int) pSData->data_len) {
           if (*sData != 0x5c) {
             *dData++ = (((*sData) & 0x0f) << 4) + 0x0f;
             *dData++ = ((*sData) & 0xf0) + 0x0f;
@@ -753,7 +732,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
           }
         }
         if (iD != 512) {
-          while (iS < pSData->length - 8 && iD < 512) {
+          while (iS < (int)pSData->length - 8 && iD < 512) {
             *dData++ = ((*sData) & 0x0f) << 4;
             *dData++ = (*sData) & 0xf0;
             sData++;
@@ -766,8 +745,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
            	scan_idx, scan_idx, iD);*/
         }
         dataPtr = unpacked_data;
-      } else if (strange_radar_type == RT_4GA) {   // $$$
-        LOG_INFO(wxT("$$$ radartype8"));
+      } else if (strange_radar_type == RT_4GA) {   // 
         if (pSData->data_len != RETURNS_PER_LINE * 2) {
           m_ri->m_statistics.broken_spokes++;
           LOG_INFO(wxT("ProcessScanData data len %d should be %d.\n"), pSData->data_len, RETURNS_PER_LINE);
@@ -783,7 +761,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
       m_ri->m_statistics.spokes++;
       unsigned int spoke = sHeader->azimuth;
       if (m_next_spoke >= 0 && spoke != m_next_spoke) {
-        if (spoke > m_next_spoke) {
+        if ((int)spoke > m_next_spoke) {
           m_ri->m_statistics.missing_spokes += spoke - m_next_spoke;
         } else {
           m_ri->m_statistics.missing_spokes += SPOKES + spoke - m_next_spoke;
@@ -813,7 +791,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
 
 static uint8_t rd_msg_1s[] = {0x00, 0x80, 0x01, 0x00, 0x52, 0x41, 0x44, 0x41, 0x52, 0x00, 0x00, 0x00};
 
-//void RME120Receive::Send1sKeepalive() {
+//void RME120Receive::Send1sKeepalive() {  // to do $$$
 //  sendto(m_reportsocket, (const char *)rd_msg_1s, sizeof(rd_msg_1s), 0, (struct sockaddr *)&m_radar_addr, sizeof(m_radar_addr));
 //}
 //
@@ -860,25 +838,11 @@ static uint8_t rd_msg_1s[] = {0x00, 0x80, 0x01, 0x00, 0x52, 0x41, 0x44, 0x41, 0x
 //}
 
 
-//bool RME120Receive::ProcessReport(const uint8_t *report, size_t len) {
-//  time_t now = time(0);
-//
-//  m_ri->resetTimeout(now);
-//
-//  LOG_INFO(wxT("$$$ processframe1"));
-//
-//  return true;
-//}
-
-
-
-
 
 void RME120Receive::Shutdown() {
   if (m_send_socket != INVALID_SOCKET) {
     m_shutdown_time_requested = wxGetUTCTimeMillis();
     if (send(m_send_socket, "!", 1, MSG_DONTROUTE) > 0) {
-      LOG_VERBOSE(wxT("radar_pi: %s $$$requested receive thread to stop"), m_ri->m_name.c_str());
       return;
     }
   }

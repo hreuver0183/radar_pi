@@ -45,8 +45,8 @@ class RadarLocationInfo {
   NetworkAddress send_command_addr;  // Where displays will send commands to the radar
 
   wxString to_string() const {
-    if (spoke_data_addr.IsNull() && serialNr.IsNull()) {
-      return wxT("");
+    if (spoke_data_addr.IsNull() && (serialNr.IsNull() || serialNr == wxT(" "))) {
+      return wxT(" ");  // empty strings don't work in wsWidgets (df)
     }
     return wxString::Format(wxT("%s/%s/%s/%s"), serialNr, spoke_data_addr.to_string(), report_addr.to_string(),
                             send_command_addr.to_string());

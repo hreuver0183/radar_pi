@@ -35,38 +35,33 @@
 #include "RadarInfo.h"
 #include "pi_common.h"
 #include "socketutil.h"
-#include "RadarReceive.h"
-#include "RadarControl.h"
 
 PLUGIN_BEGIN_NAMESPACE
 
-class RME120Control: public RadarControl {
+class RME120Control : public RadarControl {
  public:
-  
-  ~RME120Control();
-  bool Init(radar_pi *pi, RadarInfo *ri, NetworkAddress &ifadr, NetworkAddress &radaradr);
-
   RME120Control();
+  ~RME120Control();
+
+  bool Init(radar_pi *pi, RadarInfo *ri, NetworkAddress &ifadr, NetworkAddress &radaradr);
 
   void RadarTxOff();
   void RadarTxOn();
   bool RadarStayAlive();
   bool SetRange(int meters);
-  void SetMultiCastAddress(NetworkAddress sendMultiCastAddress);
-
   bool SetControlValue(ControlType controlType, RadarControlItem &item, RadarControlButton *button);
 
-   private:
+ private:
   radar_pi *m_pi;
   RadarInfo *m_ri;
-  struct sockaddr_in m_addr;
+
   SOCKET m_radar_socket;
   wxString m_name;
 
- // bool TransmitCmd(const uint8_t *msg, int size);
-//  void logBinaryData(const wxString &what, const uint8_t *data, int size);
+  bool TransmitCmd(const uint8_t *msg, int size);
+  void logBinaryData(const wxString &what, const uint8_t *data, int size);
+  void SetRangeIndex(size_t index);
 };
-
 
 PLUGIN_END_NAMESPACE
 
