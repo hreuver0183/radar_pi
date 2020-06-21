@@ -119,7 +119,7 @@ static uint8_t rd_msg_tx_control[] = {0x01, 0x80, 0x01, 0x00,
                                       0x00, 0x00, 0x00};
 
 void RME120Control::RadarTxOff() {
-  rd_msg_tx_control[4] = 3;
+  rd_msg_tx_control[4] = 0;
   TransmitCmd(rd_msg_tx_control, sizeof(rd_msg_tx_control));
 }
 
@@ -140,7 +140,7 @@ bool RME120Control::RadarStayAlive() {
 
 static uint8_t rd_msg_set_range[] = {0x01, 0x81, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
                                      0x01,  // Range at offset 8 (0 - 1/8, 1 - 1/4, 2 - 1/2, 3 - 3/4, 4 - 1, 5 - 1.5, 6 - 3...)
-                                     0x00, 0x00, 0x00};
+                                     0x00, 0x00, 0x00};   // length == 12
 
 static int radar_ranges[] = {1852 / 4,  1852 / 2,  1852,      1852 * 3 / 2, 1852 * 3,  1852 * 6,  // update from RadarFacory  ?? $$$
                              1852 * 12, 1852 * 24, 1852 * 48, 1852 * 96,    1852 * 144};

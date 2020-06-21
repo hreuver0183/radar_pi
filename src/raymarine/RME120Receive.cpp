@@ -162,7 +162,7 @@ void *RME120Receive::Entry(void) {
   sockaddr_in *radar_addr = 0;
 
   SOCKET reportSocket = INVALID_SOCKET;
-
+  UpdateSendCommand();  // $$$ may be not needed, but does not seem to harm
   LOG_VERBOSE(wxT("radar_pi: RamarineReceive thread %s starting"), m_ri->m_name.c_str());
   reportSocket = GetNewReportSocket();  // Start using the same interface_addr as previous time
 

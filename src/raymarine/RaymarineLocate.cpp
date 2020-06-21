@@ -199,15 +199,15 @@ struct SRMRadarFunc {
 bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const NetworkAddress &interface_address,
                                     const uint8_t *report, size_t len) {
   
-   // LOG_INFO(wxT("radar_pi: $$$Wake radar request from %s"), radar_address.FormatNetworkAddress());
+    LOG_INFO(wxT("radar_pi: $$$Wake radar request from %s"), radar_address.FormatNetworkAddress());
 
   SRMRadarFunc *rRec = (SRMRadarFunc *)report;
    wxCriticalSectionLocker lock(m_exclusive);
   
   if (len == sizeof(SRMRadarFunc) && rRec->func_id == 1) {  // only length 36 is processed with id==1, others (28, 37, 40, 56) to be investigated
-    if (m_pi->m_settings.verbose >= 0 /* was 2*/) {
+    //if (m_pi->m_settings.verbose >= 0 /* was 2*/) {
       LOG_BINARY_RECEIVE(wxT("radar_pi: $$$ RaymarineLocate received RadarReport"), report, len);
-    }
+   // }
     
     // radar_address.addr.s_addr = ntohl(rRec->radar_ip);
     // radar_address.port = ntohs(rRec->radar_port);
