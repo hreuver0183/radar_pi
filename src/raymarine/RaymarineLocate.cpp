@@ -157,7 +157,6 @@ void *RaymarineLocate::Entry(void) {
               rescan_network_cards = -PERIOD_UNTIL_CARD_REFRESH;  // Give double time until we rescan
             }
             success = true;
-            LOG_INFO(wxT("$$$a locate success"));
           }
         }
       }
@@ -199,8 +198,7 @@ struct SRMRadarFunc {
 bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const NetworkAddress &interface_address,
                                     const uint8_t *report, size_t len) {
   
-    LOG_INFO(wxT("radar_pi: $$$Wake radar request from %s"), radar_address.FormatNetworkAddress());
-
+    
   SRMRadarFunc *rRec = (SRMRadarFunc *)report;
    wxCriticalSectionLocker lock(m_exclusive);
   
@@ -218,8 +216,8 @@ bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const N
     infoA.spoke_data_addr.port = ntohs(rRec->mcast_port);
     infoA.report_addr.addr.s_addr = ntohl(rRec->mcast_ip);
     infoA.report_addr.port = ntohs(rRec->mcast_port);
-    infoA.send_command_addr.addr.s_addr = ntohl(rRec->mcast_ip);
-    infoA.send_command_addr.port = ntohs(rRec->mcast_port);
+    infoA.send_command_addr = radar_address;
+    infoA.send_command_addr.port = ntohs(2059);
     NetworkAddress radar_ipA = radar_address;
     radar_ipA.port = htons(RO_PRIMARY);
     if (m_report_count < MAX_REPORT) {

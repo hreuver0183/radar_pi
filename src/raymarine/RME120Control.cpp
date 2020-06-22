@@ -41,10 +41,10 @@ RME120Control::RME120Control() {
 }
 
 RME120Control::~RME120Control() {
-  /*if (m_radar_socket != INVALID_SOCKET) {
+  if (m_radar_socket != INVALID_SOCKET) {
     closesocket(m_radar_socket);
     LOG_TRANSMIT(wxT("radar_pi: %s transmit socket closed"), m_name.c_str());
-  }*/
+  }
   int i = 0;
   i++;
 }
