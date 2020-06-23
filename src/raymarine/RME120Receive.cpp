@@ -789,55 +789,6 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
   }
 }
 
-static uint8_t rd_msg_1s[] = {0x00, 0x80, 0x01, 0x00, 0x52, 0x41, 0x44, 0x41, 0x52, 0x00, 0x00, 0x00};
-
-//void RME120Receive::Send1sKeepalive() {  // to do $$$
-//  sendto(m_reportsocket, (const char *)rd_msg_1s, sizeof(rd_msg_1s), 0, (struct sockaddr *)&m_radar_addr, sizeof(m_radar_addr));
-//}
-//
-//static uint8_t rd_msg_5s[] = {0x03, 0x89, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-//                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x01, 0x00, 0x00,
-//                              0x9e, 0x03, 0x00, 0x00, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-//
-//void RME120Receive::Send5sKeepalive() {
-//  sendto(m_dataSocket, (const char *)rd_msg_5s, sizeof(rd_msg_5s), 0, (struct sockaddr *)&m_radar_addr, sizeof(m_radar_addr));
-//}
-//
-//static uint8_t rd_msg_once[] = {0x02, 0x81, 0x01, 0x00, 0x7d, 0x00, 0x00, 0x00, 0xfa, 0x00, 0x00, 0x00, 0xf4, 0x01,
-//                                0x00, 0x00, 0xee, 0x02, 0x00, 0x00, 0xdc, 0x05, 0x00, 0x00, 0xb8, 0x0b, 0x00, 0x00,
-//                                0x70, 0x17, 0x00, 0x00, 0xe0, 0x2e, 0x00, 0x00, 0xc0, 0x5d, 0x00, 0x00, 0x80, 0xbb,
-//                                0x00, 0x00, 0x40, 0x19, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-//                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-//
-//static uint8_t wakeup_msg[] = "ABCDEFGHIJKLMNOP";
-//
-//void RME120Receive::WakeupRadar() {
-//  if (!m_pi->m_settings.enable_transmit) return;
-//
-//  int outSD = socket(AF_INET, SOCK_DGRAM, 0);
-//  if (outSD < 0) {
-//    perror("Unable to create a socket");
-//    return;
-//  }
-//
-//  struct sockaddr_in groupSock;
-//  memset((char *)&groupSock, 0, sizeof(groupSock));
-//  groupSock.sin_family = AF_INET;
-//  groupSock.sin_addr.s_addr = inet_addr("224.0.0.1");
-//  groupSock.sin_port = htons(5800);
-//
-//  for (int i = 0; i < 10; i++) {
-//    int res = sendto(outSD, (const char *)wakeup_msg, 16, 0, (struct sockaddr *)&groupSock, sizeof(groupSock));
-//    if (res < 0) {
-//      perror("send_revive, dying 1");
-//    }
-//    Sleep(10);
-//  }
-//
-//  close(outSD);
-//}
-
-
 
 void RME120Receive::Shutdown() {
   if (m_send_socket != INVALID_SOCKET) {

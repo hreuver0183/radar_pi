@@ -69,7 +69,7 @@ class RadarControl {
    *
    * @returns   true on success, false on failure.
    */
-  virtual bool RadarStayAlive() { return true; };  // $$$???
+  virtual bool RadarStayAlive() { return true; };
 
   /*
    * Set the range to the given range in meters.

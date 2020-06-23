@@ -216,8 +216,8 @@ bool RaymarineLocate::ProcessReport(const NetworkAddress &radar_address, const N
     infoA.spoke_data_addr.port = ntohs(rRec->mcast_port);
     infoA.report_addr.addr.s_addr = ntohl(rRec->mcast_ip);
     infoA.report_addr.port = ntohs(rRec->mcast_port);
-    infoA.send_command_addr = radar_address;
-    infoA.send_command_addr.port = ntohs(2059);
+    infoA.send_command_addr.addr.s_addr = ntohl(rRec->radar_ip);
+    infoA.send_command_addr.port = ntohs(rRec->radar_port);
     NetworkAddress radar_ipA = radar_address;
     radar_ipA.port = htons(RO_PRIMARY);
     if (m_report_count < MAX_REPORT) {
