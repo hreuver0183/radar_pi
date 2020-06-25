@@ -148,7 +148,7 @@ SET(SRC_RADAR
             src/shaderutil.h
             src/socketutil.cpp
             src/socketutil.h
-
+            src/version.h
 )
 
 SET(SRC_NMEA0183
