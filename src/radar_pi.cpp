@@ -126,6 +126,7 @@ radar_pi::radar_pi(void *ppimgr) : opencpn_plugin_116(ppimgr) {
   m_boot_time = wxGetUTCTimeMillis();
   m_initialized = false;
   m_predicted_position_initialised = false;
+  LOG_INFO(wxT("$$$ radar_pi version RMtest01 25-06-2020"));
 
   // Create the PlugIn icons
   initialize_images();
