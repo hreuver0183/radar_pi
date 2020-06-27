@@ -376,8 +376,8 @@ SOCKET NavicoReceive::PickNextEthernetCard() {
 
 SOCKET NavicoReceive::GetNewReportSocket() {  
   SOCKET socket;
-  wxString error = wxT("");
-  wxString s = wxT("");
+  wxString error = wxT(" ");
+  wxString s = wxT(" ");
   
   if (!(m_info == m_pi->GetNavicoRadarInfo(m_ri->m_radar))) {   // initial values or NavicoLocate modified the info
     m_info = m_pi->GetNavicoRadarInfo(m_ri->m_radar);

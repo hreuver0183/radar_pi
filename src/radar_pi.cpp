@@ -501,7 +501,7 @@ bool radar_pi::MakeRadarSelection() {
     }
   }
 
-  NetworkAddress null = NetworkAddress(wxT(""));
+  NetworkAddress null = NetworkAddress(wxT(" "));
 #define CLEAR_RADAR_INFO                         \
   CLEAR_STRUCT(m_settings.navico_radar_info[r]); \
   m_settings.navico_radar_info[r].serialNr = wxT(" ");
@@ -1143,7 +1143,7 @@ void radar_pi::TimedControlUpdate() {
     case HEADING_FIX_HDM:
     case HEADING_NMEA_HDM:
     case HEADING_RADAR_HDM:
-      info = wxT("");
+      info = wxT(" ");
       break;
     case HEADING_FIX_COG:
       info = _("COG");
@@ -1166,7 +1166,7 @@ void radar_pi::TimedControlUpdate() {
     case HEADING_FIX_HDT:
     case HEADING_NMEA_HDT:
     case HEADING_RADAR_HDT:
-      info = wxT("");
+      info = wxT(" ");
       break;
     case HEADING_FIX_HDM:
     case HEADING_NMEA_HDM:
