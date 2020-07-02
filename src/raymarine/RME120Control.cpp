@@ -164,7 +164,7 @@ void RME120Control::SetRangeIndex(size_t index) {
 
 bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &item, RadarControlButton *button) {
   bool r = false;
-  LOG_INFO(wxT("$$$$ contorl called"));
+  LOG_INFO(wxT("$$$ SetControlValue called"));
   int value = item.GetValue();
   RadarControlState state = item.GetState();
   int autoValue = 0;

@@ -305,7 +305,7 @@ void RadarInfo::DetectedRadar(NetworkAddress &interfaceAddress, NetworkAddress &
   m_pi->SetRadarInterfaceAddress(m_radar, interfaceAddress, radarAddress);
   if (m_control) {
     if (!m_control->Init(m_pi, this, interfaceAddress, radarAddress)) {
-      wxLogError(wxT("radar_pi %s: Unable to create transmit socket"), m_name.c_str());
+      LOG_INFO(wxT("radar_pi %s: Unable to create transmit socket"), m_name.c_str());  //$$$ wxLogError
     } else {
       LOG_TRANSMIT(wxT("radar_pi %s: Created transmit socket"), m_name.c_str());
     }

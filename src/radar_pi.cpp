@@ -126,7 +126,7 @@ radar_pi::radar_pi(void *ppimgr) : opencpn_plugin_116(ppimgr) {
   m_boot_time = wxGetUTCTimeMillis();
   m_initialized = false;
   m_predicted_position_initialised = false;
-  LOG_INFO(wxT("$$$ radar_pi version RMtest01 25-06-2020"));
+  LOG_INFO(wxT("$$$ radar_pi version RMtest02 02-07-2020"));
 
   // Create the PlugIn icons
   initialize_images();
@@ -270,6 +270,7 @@ int radar_pi::Init(void) {
   //    And load the configuration items
   if (LoadConfig()) {
     LOG_INFO(wxT("radar_pi: Configuration file values initialised"));
+    m_settings.verbose = 12;   // $$$ only for testing, to be removed
     LOG_INFO(wxT("radar_pi: Log verbosity = %d. To modify, set VerboseLog to sum of:"), m_settings.verbose);
     LOG_INFO(wxT("radar_pi: VERBOSE  = %d"), LOGLEVEL_VERBOSE);
     LOG_INFO(wxT("radar_pi: DIALOG   = %d"), LOGLEVEL_DIALOG);
