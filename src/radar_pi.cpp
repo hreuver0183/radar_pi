@@ -126,7 +126,7 @@ radar_pi::radar_pi(void *ppimgr) : opencpn_plugin_116(ppimgr) {
   m_boot_time = wxGetUTCTimeMillis();
   m_initialized = false;
   m_predicted_position_initialised = false;
-  LOG_INFO(wxT("$$$ radar_pi version RMtest02 02-07-2020"));
+  LOG_INFO(wxT("$$$ radar_pi version RMtest03 06-07-2020"));
 
   // Create the PlugIn icons
   initialize_images();
@@ -170,7 +170,7 @@ int radar_pi::Init(void) {
       // Might as well give up now
       return 0;
     }
-    wxLogMessage(wxT("radar_pi: Windows sockets initialized"));
+    LOG_TRANSMIT(wxT("radar_pi: Windows sockets initialized"));
 #endif
 
     AddLocaleCatalog(_T("opencpn-radar_pi"));

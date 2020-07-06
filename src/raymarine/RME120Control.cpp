@@ -158,6 +158,7 @@ bool RME120Control::SetRange(int meters) {
 }
 
 void RME120Control::SetRangeIndex(size_t index) {
+  LOG_INFO(wxT("$$$ SetRangeIndex index = %i"), index);
   rd_msg_set_range[8] = index;
   TransmitCmd(rd_msg_set_range, sizeof(rd_msg_set_range));
 }
@@ -221,17 +222,18 @@ bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &i
                        0x00,  // Gain value at offset 20
                        0x00, 0x00, 0x00};
 
-      uint8_t cmd2[] = {0x01, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      uint8_t cmd2[] = {0x01, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x01,  // Gain auto - 1, manual - 0 at offset 16
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
       if (!autoValue) {
+         cmd2[16] = 0;
+         r = TransmitCmd(cmd2, sizeof(cmd2));  // set auto off
         cmd[20] = value;
-        r = TransmitCmd(cmd, sizeof(cmd));
-        cmd2[12] = 0;
-        r = TransmitCmd(cmd2, sizeof(cmd2));  // set auto off
+        r = TransmitCmd(cmd, sizeof(cmd));        
       } else {                                // auto on
-        cmd2[12] = 1;
+        cmd2[16] = 1;
         r = TransmitCmd(cmd2, sizeof(cmd2));  // set auto on
       }
       LOG_VERBOSE(wxT("radar_pi: %s Gain: %d auto %d"), m_name.c_str(), value, autoValue);

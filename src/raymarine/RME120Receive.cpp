@@ -191,7 +191,7 @@ void *RME120Receive::Entry(void) {
    
     wxLongLong start = wxGetUTCTimeMillis();
     r = select(maxFd + 1, &fdin, 0, 0, &tv);
-    LOG_RECEIVE(wxT("radar_pi: select maxFd=%d r=%d elapsed=%lld"), maxFd, r, wxGetUTCTimeMillis() - start);
+    //$$$LOG_RECEIVE(wxT("radar_pi: select maxFd=%d r=%d elapsed=%lld"), maxFd, r, wxGetUTCTimeMillis() - start);
 
     if (r > 0) {
       if (m_receive_socket != INVALID_SOCKET && FD_ISSET(m_receive_socket, &fdin)) {
@@ -446,19 +446,19 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
     if (fbPtr->type == 0x010001) {
       switch (fbPtr->status) {
         case 0:
-          wxLogMessage(wxT("RMRadar_pi: %s received transmit off from %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
+          LOG_RECEIVE(wxT("radar_pi: %s received transmit off from %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
           m_ri->m_state.Update(RADAR_STANDBY);
           break;
         case 1:
-          wxLogMessage(wxT("RMRadar_pi: %s received transmit on from %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
+          LOG_RECEIVE(wxT("radar_pi: %s received transmit on from %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
           m_ri->m_state.Update(RADAR_TRANSMIT);
           break;
         case 2:  // Warmup
-          wxLogMessage(wxT("RMRadar_pi: %s radar is warming up %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
+          LOG_RECEIVE(wxT("radar_pi: %s radar is warming up %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
           m_ri->m_state.Update(RADAR_STARTING);
           break;
         case 3:  // Off
-          wxLogMessage(wxT("RMRadar_pi: %s radar is off %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
+          LOG_RECEIVE(wxT("radar_pi: %s radar is off %s"), m_ri->m_name.c_str(), "--" /*addr.c_str()*/);
           m_ri->m_state.Update(RADAR_OFF);
           break;
         default:
@@ -471,13 +471,13 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
           current_ranges[i] = fbPtr->range_values[i];
           radar_ranges[i] = 1852 * fbPtr->range_values[i] / 500;
 
-          wxLogMessage(wxT("$$$radar ranges %d (%d)\n"), current_ranges[i], radar_ranges[i]);  //  get ranges from type/h
+          LOG_RECEIVE(wxT("$$$radar ranges %d (%d)\n"), current_ranges[i], radar_ranges[i]);  //  get ranges from type/h
         }
       }
       if (radar_ranges[fbPtr->range_id] != m_range_meters) {
         // if (m_pi->m_settings.verbose >= 1)
         {
-          wxLogMessage(wxT("RMRadar_pi: %s now scanning with range %d meters (was %d meters)"), m_ri->m_name.c_str(),
+          LOG_RECEIVE(wxT("radar_pi: %s now scanning with range %d meters (was %d meters)"), m_ri->m_name.c_str(),
                        radar_ranges[fbPtr->range_id], m_range_meters);
         }
         m_range_meters = radar_ranges[fbPtr->range_id];
