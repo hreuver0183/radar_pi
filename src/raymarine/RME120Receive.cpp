@@ -637,7 +637,6 @@ struct CRMScanData {
 void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
   if (len > sizeof(CRMPacketHeader) + sizeof(CRMScanHeader)) {
     CRMPacketHeader *pHeader = (CRMPacketHeader *)data;
-    RadarType strange_radar_type = RM_E120;
     if (pHeader->type != 0x00010003 || pHeader->something_1 != 0x0000001c || pHeader->something_3 != 0x0000001) {
       fprintf(stderr, "ProcessScanData::Packet header mismatch %x, %x, %x, %x.\n", pHeader->type, pHeader->something_1,
               pHeader->nspokes, pHeader->something_3);
@@ -646,19 +645,8 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
     m_ri->m_state.Update(RADAR_TRANSMIT);
 
     if (pHeader->something_4 == 0x400) {
-      if (strange_radar_type != RT_4GA) {
-        strange_radar_type = RT_4GA;
-        LOG_RECEIVE(wxT(" radartype RT_4GA set ???"));
-        //m_pi->m_pMessageBox->SetRadarType(RT_4GA);
-      }
-    } else {
-      if (strange_radar_type != RM_E120) {   // RT_BR24 before
-        LOG_RECEIVE(wxT(" radartype3"));
-        strange_radar_type = RM_E120;
-        //m_pi->m_pMessageBox->SetRadarType(RT_BR24);
-      }
-    }
-
+        LOG_RECEIVE(wxT(" different radar type found"));
+    } 
     wxLongLong nowMillis = wxGetLocalTimeMillis();
     int headerIdx = 0;
     int nextOffset = sizeof(CRMPacketHeader);
@@ -677,15 +665,8 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
             sHeader->something_6 != 0 || sHeader->something_7 != 1) {
             LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d part 2 check failed.\n"), headerIdx);
           break;
-        } else if (strange_radar_type != RT_4GA) {
-          strange_radar_type = RT_4GA;         
-          LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d HD second header with regular first.\n"), headerIdx);
-        }
-
-      } else if (strange_radar_type != RM_E120) {
-        strange_radar_type = RM_E120;
-        LOG_RECEIVE(wxT("ProcessScanData::Scan header #%d regular second header with HD first.\n"), headerIdx);
-      }
+        } 
+      } 
 
       nextOffset += sizeof(CRMScanHeader);
 
@@ -704,7 +685,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
         break;
       }
       UINT8 unpacked_data[1024], *dataPtr = 0;
-      if (strange_radar_type == RM_E120) {
+      
         uint8_t *dData = (uint8_t *)unpacked_data;
         uint8_t *sData = (uint8_t *)data + nextOffset + sizeof(CRMScanData);
 
@@ -744,18 +725,7 @@ void RME120Receive::ProcessScanData(const UINT8 *data, int len) {
            	scan_idx, scan_idx, iD);*/
         }
         dataPtr = unpacked_data;
-      } else if (strange_radar_type == RT_4GA) {   // 
-        if (pSData->data_len != RETURNS_PER_LINE * 2) {
-          m_ri->m_statistics.broken_spokes++;
-          LOG_INFO(wxT("ProcessScanData data len %d should be %d.\n"), pSData->data_len, RETURNS_PER_LINE);
-          break;
-        }
-        if (m_range_meters == 0) m_range_meters = 1852 / 4;  // !!!TEMP delete!!!
-        dataPtr = (UINT8 *)data + nextOffset + sizeof(CRMScanData);
-      } else {
-        LOG_INFO(wxT("ProcessScanData::Packet radar type is not set somehow.\n"));
-        break;
-      }
+       
       nextOffset += pSData->length;
       m_ri->m_statistics.spokes++;
       unsigned int spoke = sHeader->azimuth;
