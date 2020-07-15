@@ -491,10 +491,10 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
       m_ri->m_gain.Update(fbPtr->gain, state);
             
       state = (fbPtr->auto_sea > 0) ? RCS_AUTO_1 : RCS_MANUAL;
-      state = (RadarControlState) fbPtr->auto_sea;
-      m_ri->m_sea.UpdateState(state);
-     
-      m_ri->m_rain.Update(fbPtr->rain_value);
+      m_ri->m_sea.Update(fbPtr->sea_value, state);
+
+      state = (fbPtr->rain_enabled) ? RCS_MANUAL : RCS_OFF;
+      m_ri->m_rain.Update(fbPtr->rain_value, state);
 
       m_ri->m_target_expansion.Update(fbPtr->target_expansion);
       m_ri->m_interference_rejection.Update(fbPtr->interference_rejection);
@@ -513,7 +513,8 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
       m_ri->m_warmup_time.Update(fbPtr->warmup_time);
       m_ri->m_signal_strength.Update(fbPtr->signal_strength);
 
-      m_ri->m_ftc.Update(fbPtr->ftc_value);
+      state = (fbPtr->ftc_enabled) ? RCS_MANUAL : RCS_OFF;
+      m_ri->m_ftc.Update(fbPtr->ftc_value, state);
 
       /*if (m_ri->m_control_dialog) {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, ID_CONTROL_DIALOG_REFRESH);
@@ -526,14 +527,21 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
 void RME120Receive::ProcessPresetFeedback(const UINT8 *data, int len) {
   if (len == sizeof(SRadarPresetFeedback)) {
     SRadarPresetFeedback *fbPtr = (SRadarPresetFeedback *)data;
-
+    LOG_INFO(wxT("$$$$ ProcessPresetFeedback"));
     // In this system max en min values are fixed
+    m_ri->m_tune_coarse.Update(fbPtr->coarse_tune_value);
+    
+    m_ri->m_stc.Update(fbPtr->stc_preset_value);
+    RadarControlState state;
+    state = RCS_MANUAL;
+    LOG_INFO(wxT(" m_display_timing=%i"), fbPtr->display_timing_value);
+    m_ri->m_display_timing.Update(fbPtr->display_timing_value, state);
+    
+    
+    //m_ri->m_stc.UpdateMax(fbPtr->stc_preset_max);
 
-   /* m_tuneCoarse.Update(fbPtr->coarse_tune_value);
-    m_stc.Update(fbPtr->stc_preset_value);
-    m_displayTiming.Update(fbPtr->display_timing_value);
-    m_stc.UpdateMax(fbPtr->stc_preset_max);
-    m_gain.SetMin(fbPtr->min_gain);
+
+   /* m_gain.SetMin(fbPtr->min_gain);
     m_gain.SetMax(fbPtr->max_gain);
     m_sea.SetMin(fbPtr->min_sea);
     m_sea.SetMax(fbPtr->max_sea);

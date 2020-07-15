@@ -195,7 +195,7 @@ bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &i
     case CT_ANTENNA_STARBOARD:
     case CT_NO_TRANSMIT_START:
     case CT_NO_TRANSMIT_END:
-    case CT_FTC:
+ 
       // The above are not settings that are not radar commands or not supported by Navico radar.
       // Made them explicit so the compiler can catch missing control types.
       break;
@@ -208,14 +208,13 @@ bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &i
       if (value < 0) {
         value += 360;
       }
-      uint8_t cmd[] = {0x07, 0x82, 0x01, 0x00, 0x14, 0x00, 0x00, 0x00};
-
-      cmd[4] = value & 0xff;
-      cmd[5] = (value >> 8) & 0xff;
-      cmd[6] = (value >> 16) & 0xff;
-      cmd[7] = (value >> 24) & 0xff;
+      uint8_t rd_msg_bearing_offset[] = {0x07, 0x82, 0x01, 0x00, 0x14, 0x00, 0x00, 0x00};
+      rd_msg_bearing_offset[4] = value & 0xff;
+      rd_msg_bearing_offset[5] = (value >> 8) & 0xff;
+      rd_msg_bearing_offset[6] = (value >> 16) & 0xff;
+      rd_msg_bearing_offset[7] = (value >> 24) & 0xff;
       LOG_VERBOSE(wxT("radar_pi: %s $$$Bearing alignment: %d"), m_name.c_str(), value);
-      r = TransmitCmd(cmd, sizeof(cmd));
+      r = TransmitCmd(rd_msg_bearing_offset, sizeof(rd_msg_bearing_offset));
       break;
     }
 
@@ -243,27 +242,163 @@ bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &i
       break;
     }
 
-    //case CT_SEA: {
-    //  int v = (value + 1) * 255 / 100;
-    //  if (v > 255) {
-    //    v = 255;
-    //  }
-    //  uint8_t cmd[] = {0x06, 0xc1, 0x02, 0, 0, 0, (uint8_t)autoValue, 0, 0, 0, (uint8_t)v};
-    //  LOG_VERBOSE(wxT("radar_pi: %s Sea: %d auto %d"), m_name.c_str(), value, autoValue);
-    //  r = TransmitCmd(cmd, sizeof(cmd));
-    //  break;
-    //}
+    case CT_SEA: {
+      uint8_t rd_msg_set_sea[] = {0x02, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                       0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                       0x00,  // Sea value at offset 20
+                       0x00, 0x00, 0x00};
 
-    //case CT_RAIN: {  // Rain Clutter - Manual. Range is 0x01 to 0x50
-    //  int v = (value + 1) * 255 / 100;
-    //  if (v > 255) {
-    //    v = 255;
-    //  }
-    //  uint8_t cmd[] = {0x06, 0xc1, 0x04, 0, 0, 0, 0, 0, 0, 0, (uint8_t)v};
-    //  LOG_VERBOSE(wxT("radar_pi: %s Rain: %d"), m_name.c_str(), value);
-    //  r = TransmitCmd(cmd, sizeof(cmd));
-    //  break;
-    //}
+      uint8_t rd_msg_sea_auto[] = {0x02, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x01,  // Sea auto value at offset 16
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+      if (!autoValue) {
+        rd_msg_set_sea[20] = value;
+        r = TransmitCmd(rd_msg_set_sea, sizeof(rd_msg_set_sea));
+      } else {
+        rd_msg_sea_auto[16] = 1;
+        r = TransmitCmd(rd_msg_sea_auto, sizeof(rd_msg_sea_auto));
+      }
+      break;
+    }
+
+    case CT_RAIN: {  // Rain Clutter
+
+      uint8_t rd_msg_rain_on[] = {0x03, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                  0x01,  // Rain on at offset 16
+                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+      uint8_t rd_msg_rain_set[] = {0x03, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                   0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                   0x33,  // Rain value at offset 20
+                                   0x00, 0x00, 0x00};
+
+      if (value != 0) {
+        rd_msg_rain_on[16] = 1;  // rain on first
+        r = TransmitCmd(rd_msg_rain_on, sizeof(rd_msg_rain_on));
+        rd_msg_rain_set[20] = value;
+        r = TransmitCmd(rd_msg_rain_set, sizeof(rd_msg_rain_set));
+      } else {
+        rd_msg_rain_on[16] = 0;  // rain off
+        r = TransmitCmd(rd_msg_rain_on, sizeof(rd_msg_rain_on));
+      }
+      break;
+    }
+
+    case CT_FTC: {
+      uint8_t rd_msg_ftc_on[] = {0x04, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                 0x01,  // FTC on at offset 16
+                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+      uint8_t rd_msg_ftc_set[] = {0x04, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                  0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                  0x1a,  // FTC value at offset 20
+                                  0x00, 0x00, 0x00};
+      if (value != 0) {
+        rd_msg_ftc_on[16] = 1;  // rain on first
+        r = TransmitCmd(rd_msg_ftc_on, sizeof(rd_msg_ftc_on));
+        rd_msg_ftc_set[20] = value;
+        r = TransmitCmd(rd_msg_ftc_set, sizeof(rd_msg_ftc_set));
+      } else {
+        rd_msg_ftc_set[16] = 0;  // rain off
+        r = TransmitCmd(rd_msg_ftc_on, sizeof(rd_msg_ftc_on));
+      }
+      break;
+    }
+
+    case CT_MAIN_BANG_SUPPRESSION: {  // Main bang suppression
+      uint8_t rd_msg_mbs_control[] = {0x01, 0x82, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+                                      0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                      0x00,  // MBS Enable (1) at offset 16
+                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+      rd_msg_mbs_control[16] = value;  //
+      r = TransmitCmd(rd_msg_mbs_control, sizeof(rd_msg_mbs_control));
+      break;
+    }
+
+    case CT_DISPLAY_TIMING: {
+      uint8_t rd_msg_set_display_timing[] = {0x02, 0x82, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+                                             0x6d,  // Display timing value at offset 8
+                                             0x00, 0x00, 0x00};
+
+      rd_msg_set_display_timing[16] = value;
+      r = TransmitCmd(rd_msg_set_display_timing, sizeof(rd_msg_set_display_timing));
+      break;
+    }
+
+    case CT_STC: {
+      uint8_t rd_msg_set_stc_preset[] = {0x03, 0x82, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+                                         0x74,  // STC preset value at offset 8
+                                         0x00, 0x00, 0x00};
+      rd_msg_set_stc_preset[16] = value;
+      r = TransmitCmd(rd_msg_set_stc_preset, sizeof(rd_msg_set_stc_preset));
+      break;
+
+      break;
+    }
+
+    case CT_TUNE_COARSE: {  // coarse tuning
+      uint8_t rd_msg_tune_coarse[] = {0x04, 0x82, 0x01, 0x00,
+                                      0x00,  // Coarse tune at offset 4
+                                      0x00, 0x00, 0x00};
+      rd_msg_tune_coarse[4] = value;
+      r = TransmitCmd(rd_msg_tune_coarse, sizeof(rd_msg_tune_coarse));
+      break;
+    }
+
+    case CT_TUNE_FINE: {
+      uint8_t rd_msg_tune_auto[] = {0x05, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                           0x01,  // Enable at offset 12
+                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+      uint8_t rd_msg_tune_fine[] = {0x05, 0x83, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                           0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                           0x00,  // Tune value at offset 16
+                                           0x00, 0x00, 0x00};
+
+      if (!autoValue) {
+        rd_msg_tune_fine[16] = value;
+        r = TransmitCmd(rd_msg_tune_fine, sizeof(rd_msg_tune_fine));
+      } else {
+        rd_msg_tune_auto[12] = 1;
+        r = TransmitCmd(rd_msg_tune_auto, sizeof(rd_msg_tune_auto));
+      }
+      break;
+    }
+
+    case CT_TARGET_BOOST: {
+      uint8_t rd_msg_target_expansion[] = {0x06, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00,
+                                           0x01,  // Expansion value at offset 8: 0 - disabled, 1 - low, 2 - high
+                                           0x00, 0x00, 0x00};
+
+      rd_msg_target_expansion[8] = value;
+      r = TransmitCmd(rd_msg_target_expansion, sizeof(rd_msg_target_expansion));
+      break;
+    }
+
+    case CT_INTERFERENCE_REJECTION: {
+      uint8_t rd_msg_interference_rejection[] = {0x07, 0x83, 0x01, 0x00,
+                                                 0x01,  // Interference rejection at offset 4, 0 - off, 1 - normal, 2 - high
+                                                 0x00, 0x00, 0x00};
+
+      rd_msg_interference_rejection[4] = value;
+      r = TransmitCmd(rd_msg_interference_rejection, sizeof(rd_msg_interference_rejection));
+      break;
+    }
+
+    case CT_STC_CURVE: {
+      uint8_t curve_values[] = {0, 1, 2, 4, 6, 8, 10, 13};
+      uint8_t rd_msg_curve_select[] = {
+          0x0a, 0x83, 0x01, 0x00,
+          0x01  // Curve value at offset 4
+      };
+      rd_msg_curve_select[4] = curve_values[value - 1];
+      r = TransmitCmd(rd_msg_curve_select, sizeof(rd_msg_curve_select));
+      break;
+    }
+
+
 
     //case CT_SIDE_LOBE_SUPPRESSION: {
     //  int v = value * 256 / 100;

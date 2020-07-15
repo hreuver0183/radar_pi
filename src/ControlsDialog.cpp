@@ -691,14 +691,14 @@ void ControlsDialog::CreateControls() {
   }
 
    // The Fine tune button
-  if (m_ctrl[CT_FT].type) {
-    m_fine_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Fine tune"), m_ctrl[CT_FT], &m_ri->m_fine_tune);
+  if (m_ctrl[CT_TUNE_FINE].type) {
+    m_fine_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Fine tune"), m_ctrl[CT_TUNE_FINE], &m_ri->m_fine_tune);
     m_advanced_sizer->Add(m_fine_tune_button, 0, wxALL, BORDER);
   }
 
    // The Cloarse tune button
-  if (m_ctrl[CT_CT].type) {
-    m_coarse_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Coarse tune"), m_ctrl[CT_CT], &m_ri->m_coarse_tune);
+  if (m_ctrl[CT_TUNE_COARSE].type) {
+    m_coarse_tune_button = new RadarControlButton(this, ID_CONTROL_BUTTON, _("Coarse tune"), m_ctrl[CT_TUNE_COARSE], &m_ri->m_coarse_tune);
     m_advanced_sizer->Add(m_coarse_tune_button, 0, wxALL, BORDER);
   }
 

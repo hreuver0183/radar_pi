@@ -72,8 +72,8 @@ CONTROL_TYPE(CT_DOPPLER, "Doppler")
 
 // Following added for Raymarine
 CONTROL_TYPE(CT_STC, "Sensitivity Time Control")
-CONTROL_TYPE(CT_FT, "Fine tune")
-CONTROL_TYPE(CT_CT, "Coarse tune")
+CONTROL_TYPE(CT_TUNE_FINE, "Fine tune")
+CONTROL_TYPE(CT_TUNE_COARSE, "Coarse tune")
 CONTROL_TYPE(CT_STC_CURVE, "STC curve")
 CONTROL_TYPE(CT_DISPLAY_TIMING, "Display timing")
 CONTROL_TYPE(CT_MAIN_BANG_SUPPRESSION, "Main bang suppression")
