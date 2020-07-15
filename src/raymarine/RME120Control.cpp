@@ -147,8 +147,11 @@ static int radar_ranges[] = {1852 / 4,  1852 / 2,  1852,      1852 * 3 / 2, 1852
 static int current_ranges[11] = {125, 250, 500, 750, 1500, 3000, 6000, 12000, 24000, 48000, 72000};
 
 bool RME120Control::SetRange(int meters) {
+  int meters_2 = meters + 20; // RM display shows halve of what is received, so we have to ask one size larger
+                              //   to prevent getting the same range again
+  LOG_INFO(wxT("$$$ SetRangeMeters = %i"), meters);
   for (int i = 0; i < sizeof(radar_ranges) / sizeof(radar_ranges[0]); i++) {
-    if (meters <= radar_ranges[i]) {
+    if (meters_2 <= radar_ranges[i]) {
       SetRangeIndex(i);
       return true;
     }
@@ -216,7 +219,7 @@ bool RME120Control::SetControlValue(ControlType controlType, RadarControlItem &i
       break;
     }
 
-    case CT_GAIN: {
+    case CT_GAIN: {   // tested OK by Martin
       uint8_t cmd[] = {0x01, 0x83, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
                        0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                        0x00,  // Gain value at offset 20
