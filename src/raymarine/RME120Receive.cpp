@@ -508,7 +508,8 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
       state = (fbPtr->auto_tune > 0) ? RCS_AUTO_1 : RCS_MANUAL;
       m_ri->m_tune_coarse.UpdateState(state);
 
-      m_ri->m_main_bang_suppression.Update(fbPtr->mbs_enabled);
+      state = (fbPtr->mbs_enabled > 0) ? RCS_MANUAL : RCS_OFF;
+      m_ri->m_main_bang_suppression.Update(fbPtr->mbs_enabled, state);
 
       m_ri->m_warmup_time.Update(fbPtr->warmup_time);
       m_ri->m_signal_strength.Update(fbPtr->signal_strength);

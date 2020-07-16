@@ -1785,8 +1785,9 @@ void ControlsDialog::DisableRadarControls() {
   if (m_doppler_button) {
     m_doppler_button->Disable();
   }
+
   if (m_stc_button) {
-    m_stc_button->Disable();
+    m_stc_button->Enable();
   }
   if (m_fine_tune_button) {
     m_fine_tune_button->Disable();
@@ -1863,8 +1864,9 @@ void ControlsDialog::EnableRadarControls() {
   if (m_doppler_button) {
     m_doppler_button->Enable();
   }
+
   if (m_stc_button) {
-    m_stc_button->Disable();
+    m_stc_button->Enable();
   }
   if (m_fine_tune_button) {
     m_fine_tune_button->Enable();
@@ -2036,19 +2038,14 @@ void ControlsDialog::UpdateControlValues(bool refreshAll) {
     m_antenna_forward_button->UpdateLabel();
   }
 
-  // new buttons for Raymarine
-
   if (m_stc_button) {
     m_stc_button->UpdateLabel();
   }
   if (m_fine_tune_button) {
-    m_antenna_height_button->UpdateLabel();
-  }
-  if (m_fine_tune_button) {
-    m_antenna_height_button->UpdateLabel();
+    m_fine_tune_button->UpdateLabel();
   }
   if (m_coarse_tune_button) {
-    m_bearing_alignment_button->UpdateLabel();
+    m_coarse_tune_button->UpdateLabel();
   }
   if (m_stc_curve_button) {
     m_stc_curve_button->UpdateLabel();
