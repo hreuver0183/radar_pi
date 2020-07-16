@@ -1785,6 +1785,21 @@ void ControlsDialog::DisableRadarControls() {
   if (m_doppler_button) {
     m_doppler_button->Disable();
   }
+  if (m_stc_button) {
+    m_stc_button->Disable();
+  }
+  if (m_fine_tune_button) {
+    m_fine_tune_button->Disable();
+  }
+  if (m_coarse_tune_button) {
+    m_coarse_tune_button->Disable();
+  }
+  if (m_stc_curve_button) {
+    m_stc_curve_button->Disable();
+  }
+  if (m_display_timing_button) {
+    m_display_timing_button->Disable();
+  }
 }
 
 void ControlsDialog::EnableRadarControls() {
@@ -1847,6 +1862,21 @@ void ControlsDialog::EnableRadarControls() {
   }
   if (m_doppler_button) {
     m_doppler_button->Enable();
+  }
+  if (m_stc_button) {
+    m_stc_button->Disable();
+  }
+  if (m_fine_tune_button) {
+    m_fine_tune_button->Enable();
+  }
+  if (m_coarse_tune_button) {
+    m_coarse_tune_button->Enable();
+  }
+  if (m_stc_curve_button) {
+    m_stc_curve_button->Enable();
+  }
+  if (m_display_timing_button) {
+    m_display_timing_button->Enable();
   }
 }
 
@@ -2004,6 +2034,27 @@ void ControlsDialog::UpdateControlValues(bool refreshAll) {
   }
   if (m_antenna_forward_button) {
     m_antenna_forward_button->UpdateLabel();
+  }
+
+  // new buttons for Raymarine
+
+  if (m_stc_button) {
+    m_stc_button->UpdateLabel();
+  }
+  if (m_fine_tune_button) {
+    m_antenna_height_button->UpdateLabel();
+  }
+  if (m_fine_tune_button) {
+    m_antenna_height_button->UpdateLabel();
+  }
+  if (m_coarse_tune_button) {
+    m_bearing_alignment_button->UpdateLabel();
+  }
+  if (m_stc_curve_button) {
+    m_stc_curve_button->UpdateLabel();
+  }
+  if (m_display_timing_button) {
+    m_display_timing_button->UpdateLabel();
   }
 
   // For these we can't use the modified state as they are shared amongst all

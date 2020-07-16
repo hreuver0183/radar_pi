@@ -527,14 +527,15 @@ void RME120Receive::ProcessFeedback(const UINT8 *data, int len) {
 void RME120Receive::ProcessPresetFeedback(const UINT8 *data, int len) {
   if (len == sizeof(SRadarPresetFeedback)) {
     SRadarPresetFeedback *fbPtr = (SRadarPresetFeedback *)data;
-    LOG_INFO(wxT("$$$$ ProcessPresetFeedback"));
+    
     // In this system max en min values are fixed
     m_ri->m_tune_coarse.Update(fbPtr->coarse_tune_value);
     
     m_ri->m_stc.Update(fbPtr->stc_preset_value);
     RadarControlState state;
     state = RCS_MANUAL;
-    LOG_INFO(wxT(" m_display_timing=%i"), fbPtr->display_timing_value);
+    LOG_INFO(wxT(" m_display_timing=%i, old value= %i, old state=%i"), fbPtr->display_timing_value, m_ri->m_display_timing.GetValue(),
+             m_ri->m_display_timing.GetState());
     m_ri->m_display_timing.Update(fbPtr->display_timing_value, state);
     
     
