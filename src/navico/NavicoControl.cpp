@@ -108,7 +108,7 @@ void NavicoControl::logBinaryData(const wxString &what, const uint8_t *data, int
   for (i = 0; i < size; i++) {
     explain += wxString::Format(wxT(" %02X"), data[i]);
   }
-  LOG_TRANSMIT(explain);
+  //LOG_TRANSMIT(explain);
 }
 
 bool NavicoControl::TransmitCmd(const uint8_t *msg, int size) {
@@ -120,24 +120,24 @@ bool NavicoControl::TransmitCmd(const uint8_t *msg, int size) {
     wxLogError(wxT("radar_pi: Unable to transmit command to %s: %s"), m_name.c_str(), SOCKETERRSTR);
     return false;
   }
-  IF_LOG_AT(LOGLEVEL_TRANSMIT, logBinaryData(wxT("transmit"), msg, size));
+  //IF_LOG_AT(LOGLEVEL_TRANSMIT, logBinaryData(wxT("transmit"), msg, size));
   return true;
 }
 
 void NavicoControl::RadarTxOff() {
-  IF_LOG_AT(LOGLEVEL_VERBOSE | LOGLEVEL_TRANSMIT, wxLogMessage(wxT("radar_pi: %s transmit: turn Off"), m_name.c_str()));
+  //IF_LOG_AT(LOGLEVEL_VERBOSE | LOGLEVEL_TRANSMIT, wxLogMessage(wxT("radar_pi: %s transmit: turn Off"), m_name.c_str()));
   TransmitCmd(COMMAND_TX_OFF_A, sizeof(COMMAND_TX_OFF_A));
   TransmitCmd(COMMAND_TX_OFF_B, sizeof(COMMAND_TX_OFF_B));
 }
 
 void NavicoControl::RadarTxOn() {
-  IF_LOG_AT(LOGLEVEL_VERBOSE | LOGLEVEL_TRANSMIT, wxLogMessage(wxT("radar_pi: %s transmit: turn on"), m_name.c_str()));
+  //IF_LOG_AT(LOGLEVEL_VERBOSE | LOGLEVEL_TRANSMIT, wxLogMessage(wxT("radar_pi: %s transmit: turn on"), m_name.c_str()));
   TransmitCmd(COMMAND_TX_ON_A, sizeof(COMMAND_TX_ON_A));
   TransmitCmd(COMMAND_TX_ON_B, sizeof(COMMAND_TX_ON_B));
 }
 
 bool NavicoControl::RadarStayAlive() {
-  LOG_TRANSMIT(wxT("radar_pi: %s transmit: stay alive"), m_name.c_str());
+  //LOG_TRANSMIT(wxT("radar_pi: %s transmit: stay alive"), m_name.c_str());
 
   TransmitCmd(COMMAND_STAY_ON_A, sizeof(COMMAND_STAY_ON_A));
   TransmitCmd(COMMAND_STAY_ON_B, sizeof(COMMAND_STAY_ON_B));
@@ -154,7 +154,7 @@ bool NavicoControl::SetRange(int meters) {
                      (uint8_t)((decimeters >> 8) & 0XFFL),
                      (uint8_t)((decimeters >> 16) & 0XFFL),
                      (uint8_t)((decimeters >> 24) & 0XFFL)};
-    LOG_VERBOSE(wxT("radar_pi: %s transmit: range %d meters"), m_name.c_str(), meters);
+    //LOG_VERBOSE(wxT("radar_pi: %s transmit: range %d meters"), m_name.c_str(), meters);
     return TransmitCmd(pck, sizeof(pck));
   }
   return false;
